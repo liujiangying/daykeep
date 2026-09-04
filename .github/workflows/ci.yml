@@ -23,6 +23,10 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
       - name: Type check frontend
         run: npm run type-check
 
@@ -31,10 +35,6 @@ jobs:
 
       - name: Build Weixin mini program
         run: npm run build:mp-weixin
-
-      - name: Install backend dependencies
-        run: npm ci
-        working-directory: backend
 
       - name: Build backend
         run: npm run build

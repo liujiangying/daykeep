@@ -1,0 +1,84 @@
+{
+  "name": "只我们",
+  "appid": "__UNI__DAYKEEP",
+  "description": "只我们 — 和最在乎的人，留下一本只属于我们的生活记录",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false,
+      "minified": true
+    },
+    "permission": {
+      "scope.userLocation": {
+        "desc": "用于打开微信地图，为记录选择真实地点"
+      }
+    },
+    "requiredPrivateInfos": ["getLocation", "chooseLocation"],
+    "lazyCodeLoading": "requiredComponents",
+    "usingComponents": true
+  },
+  "app-plus": {
+    "modules": {
+      "Camera": {},
+      "Storage": {},
+      "OAuth": {},
+      "Geolocation": {}
+    },
+    "splashscreen": {
+      "alwaysShowBeforeRender": true,
+      "autoclose": true,
+      "waiting": true
+    },
+    "distribute": {
+      "android": {
+        "permissions": [
+          "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+          "<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\"/>",
+          "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
+          "<uses-permission android:name=\"android.permission.CAMERA\"/>",
+          "<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>",
+          "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>",
+          "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>"
+        ],
+        "minSdkVersion": 23,
+        "targetSdkVersion": 33,
+        "abiFilters": ["armeabi-v7a", "arm64-v8a"]
+      },
+      "apple": {
+        "dSYMs": false
+      },
+      "google": {},
+      "sdkConfigs": {
+        "oauth": {
+          "weixin": {
+            "appid": "",
+            "UniversalLinks": ""
+          }
+        }
+      }
+    },
+    "ios": {
+      "UIBackgroundModes": [],
+      "privacyDescription": {
+        "NSPhotoLibraryUsageDescription": "用于保存海报和上传照片",
+        "NSCameraUsageDescription": "用于拍照上传",
+        "NSLocationWhenInUseUsageDescription": "用于打开地图，为记录选择真实地点"
+      }
+    },
+    "networkSecurityConfig": {
+      "cleartextTrafficPermitted": true
+    },
+    "statusbar": {
+      "immersed": "supportedDevice",
+      "style": "dark"
+    },
+    "safearea": {
+      "background": "#ffffff",
+      "backgroundDark": "#1a1a1a"
+    }
+  },
+  "vueVersion": "3"
+}

@@ -1,0 +1,31 @@
+{
+  "name": "daykeep-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:worker": "tsx watch src/reminderWorker.ts",
+    "build": "tsc",
+    "start": "node dist/backend/src/index.js",
+    "start:worker": "node dist/backend/src/reminderWorker.js"
+  },
+  "dependencies": {
+    "@types/multer": "^2.2.0",
+    "cos-nodejs-sdk-v5": "^3.0.0",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "lunar-javascript": "^1.7.7",
+    "multer": "^2.2.0",
+    "pg": "^8.13.0",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.16.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

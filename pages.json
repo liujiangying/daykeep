@@ -1,0 +1,304 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/timeline/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/notes/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/reminders/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/onboarding/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "只我们"
+      }
+    },
+    {
+      "path": "pages/notes/edit",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/day/share",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/day/collaborate",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/day/invite",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/space/join",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "subpackages",
+      "pages": [
+        {
+          "path": "good-days/index",
+          "style": {
+            "navigationBarTitleText": "",
+            "navigationBarBackgroundColor": "#F2F4F3",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "notes/calendar",
+          "style": {
+            "navigationBarTitleText": "回忆日历",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "notes/history",
+          "style": {
+            "navigationBarTitleText": "历史上的今天",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "day/detail",
+          "style": {
+            "navigationBarTitleText": "日子详情",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "day/share",
+          "style": {
+            "navigationBarTitleText": "分享页",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "notes/edit",
+          "style": {
+            "navigationBarTitleText": "这一刻",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "commitment/detail",
+          "style": {
+            "navigationBarTitleText": "约定详情",
+            "navigationBarBackgroundColor": "#F2F4F3",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "mine/edit",
+          "style": {
+            "navigationBarTitleText": "编辑资料",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "holidays/index",
+          "style": {
+            "navigationBarTitleText": "全年节日",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "guide/index",
+          "style": {
+            "navigationBarTitleText": "使用指南",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "day/collaborate",
+          "style": {
+            "navigationBarTitleText": "共同记录",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "day/invite",
+          "style": {
+            "navigationBarTitleText": "共同记录邀请",
+            "navigationBarBackgroundColor": "#EDF6F3",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "space/create",
+          "style": {
+            "navigationStyle": "custom",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "space/detail",
+          "style": {
+            "navigationBarTitleText": "时光圈",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "space/moderation",
+          "style": {
+            "navigationBarTitleText": "管理中心",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "space/join",
+          "style": {
+            "navigationBarTitleText": "加入时光圈",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "space/album",
+          "style": {
+            "navigationBarTitleText": "年度时光册",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "review/weekly",
+          "style": {
+            "navigationBarTitleText": "本周回顾",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "quiz/index",
+          "style": {
+            "navigationBarTitleText": "默契测试",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "capsule/locked",
+          "style": {
+            "navigationBarTitleText": "时间胶囊",
+            "navigationBarBackgroundColor": "#f7f8f7",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "daily-question/answer",
+          "style": {
+            "navigationBarTitleText": "今日灵感",
+            "navigationBarBackgroundColor": "#F3F0EA",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "insights/index",
+          "style": {
+            "navigationBarTitleText": "给你的小提示",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        },
+        {
+          "path": "feedback/index",
+          "style": {
+            "navigationBarTitleText": "帮助与反馈",
+            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationBarTextStyle": "black"
+          }
+        }
+      ]
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "只我们",
+    "navigationBarBackgroundColor": "#F7F5F1",
+    "backgroundColor": "#F7F5F1"
+  },
+  "tabBar": {
+    "color": "#8A857C",
+    "selectedColor": "#2F6F6A",
+    "backgroundColor": "#FFFEFB",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/timeline/index",
+        "text": "时光",
+        "iconPath": "/static/tab/timeline.png",
+        "selectedIconPath": "/static/tab/timeline-active.png"
+      },
+      {
+        "pagePath": "pages/notes/index",
+        "text": "随手记",
+        "iconPath": "/static/tab/notes.png",
+        "selectedIconPath": "/static/tab/notes-active.png"
+      },
+      {
+        "pagePath": "pages/reminders/index",
+        "text": "约定",
+        "iconPath": "/static/tab/remind.png",
+        "selectedIconPath": "/static/tab/remind-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "/static/tab/mine.png",
+        "selectedIconPath": "/static/tab/mine-active.png"
+      }
+    ]
+  }
+}

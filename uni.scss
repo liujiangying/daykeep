@@ -1,0 +1,34 @@
+/**
+ * 只我们设计 Token（默认 = 极简黑白主题）
+ * 运行时以 services/theme 注入的 CSS 变量为准：--dk-*
+ *
+ * 字号阶梯（750 设计稿 rpx）—— 全站统一用这套，避免标题小、内容大：
+ *   display  46  页头品牌（好日子 / 随手记）
+ *   title    36  列表主标题、表单强调
+ *   body     30  正文、按钮、表单输入（默认）
+ *   label    28  分段切换、次级标题
+ *   meta     25  元信息、副标题、筛选 chip
+ *   caption  23  角标、提示、弱化辅助
+ *   num      44  列表右侧天数（强调但不压过标题）
+ *   hero     68  翻页钟数字 / 登录品牌（装饰性）
+ */
+
+$brand: #2f6f6a;
+$brand-soft: #e4f0ee;
+$ink: #1c2423;
+$muted: #6b736f;
+$line: #e2e6e4;
+$page: #f2f4f3;
+$card: #fffeff;
+
+$dk-fs-display: 46rpx;
+$dk-fs-title: 36rpx;
+$dk-fs-body: 30rpx;
+$dk-fs-label: 28rpx;
+$dk-fs-meta: 25rpx;
+$dk-fs-caption: 23rpx;
+$dk-fs-num: 44rpx;
+$dk-fs-hero: 68rpx;
+
+// 页面内推荐：background: var(--dk-bg); color: var(--dk-ink);
+// 字号推荐：font-size: var(--dk-fs-title);

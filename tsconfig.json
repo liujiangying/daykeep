@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "ignoreDeprecations": "5.0",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "types": ["@dcloudio/types", "@types/node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "api/**/*.ts",
+    "services/**/*.ts",
+    "stores/**/*.ts",
+    "shared/**/*.ts",
+    "utils/**/*.ts",
+    "composables/**/*.ts",
+    "pages/**/*.vue",
+    "components/**/*.vue",
+    "*.d.ts",
+    "App.vue",
+    "main.ts"
+  ],
+  "exclude": ["node_modules", "dist", "unpackage"]
+}

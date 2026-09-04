@@ -1,0 +1,7 @@
+{
+  "setting": {
+    "minified": true,
+    "minifyWXML": true,
+    "minifyWXSS": true
+  }
+}

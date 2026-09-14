@@ -29,6 +29,7 @@
  *   LIMIT                   每天最多条数，默认 30（上限 30）
  *   DAYS                    可选，逗号分隔 MM-DD；不设则灌全年（含 02-29）
  *   SLEEP_MS                请求间隔，默认 200，避免打太快
+ *   CONCURRENCY             拉取文件模式并发数，默认 4，最大 6
  *   FETCH_DIR               若设置：只拉取维基并写入该目录的 JSON，不连库
  *   IMPORT_DIR              若设置：只把目录内 JSON 导入数据库，不访问维基
  *                           （集群无维基出网时：本机 FETCH_DIR → kubectl cp → Pod 内 IMPORT_DIR）
@@ -43,12 +44,14 @@ import path from 'node:path'
 const require = createRequire(path.resolve(process.cwd(), 'package.json'))
 const pg = require('pg')
 
-const UA = 'Daykeep/0.1 (history-cache-warmer)'
+// Wikimedia 要求机器人请求携带可联系的产品标识；缺少联系地址会返回 403。
+const UA = 'Daykeep/0.1 (https://daykeep.cn; history-cache-warmer)'
 const MAX_LIMIT = 30
 const limit = Math.min(MAX_LIMIT, Math.max(1, Number(process.env.LIMIT || 30) || 30))
 const language = process.env.HISTORY_LANGUAGE || 'zh'
 const cacheDays = Math.max(1, Number(process.env.HISTORY_CACHE_DAYS || 365) || 365)
 const sleepMs = Math.max(0, Number(process.env.SLEEP_MS || 200) || 0)
+const concurrency = Math.min(6, Math.max(1, Number(process.env.CONCURRENCY || 4) || 4))
 
 function dbConfig() {
   if (process.env.DATABASE_URL) return { connectionString: process.env.DATABASE_URL }
@@ -211,24 +214,29 @@ async function main() {
     const days = targetDays()
     let ok = 0
     let fail = 0
-    console.log(JSON.stringify({ mode: 'fetch-only', fetchDir, language, limit, days: days.length }, null, 2))
-    for (const key of days) {
-      const [mm, dd] = key.split('-').map(Number)
-      if (!mm || !dd) {
-        fail += 1
-        continue
+    console.log(JSON.stringify({ mode: 'fetch-only', fetchDir, language, limit, days: days.length, concurrency }, null, 2))
+    let cursor = 0
+    const workers = Array.from({ length: Math.min(concurrency, days.length) }, async () => {
+      while (cursor < days.length) {
+        const key = days[cursor++]
+        const [mm, dd] = key.split('-').map(Number)
+        if (!mm || !dd) {
+          fail += 1
+          continue
+        }
+        try {
+          const payload = await fetchDay(mm, dd)
+          await writeFile(path.join(fetchDir, `${key}.json`), JSON.stringify(payload), 'utf8')
+          ok += 1
+          console.log(`[ok] ${key} stories=${payload.stories.length}`)
+        } catch (error) {
+          fail += 1
+          console.error(`[fail] ${key}`, error?.message || error)
+        }
+        if (sleepMs) await sleep(sleepMs)
       }
-      try {
-        const payload = await fetchDay(mm, dd)
-        await writeFile(path.join(fetchDir, `${key}.json`), JSON.stringify(payload), 'utf8')
-        ok += 1
-        console.log(`[ok] ${key} stories=${payload.stories.length}`)
-      } catch (error) {
-        fail += 1
-        console.error(`[fail] ${key}`, error?.message || error)
-      }
-      if (sleepMs) await sleep(sleepMs)
-    }
+    })
+    await Promise.all(workers)
     console.log(`拉取完成：成功 ${ok}，失败 ${fail}`)
     console.log('下一步：把目录拷进能连库的环境，IMPORT_DIR=该目录 再执行导入。')
     return

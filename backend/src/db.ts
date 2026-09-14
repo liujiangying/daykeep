@@ -968,6 +968,28 @@ export async function ensureSchema(): Promise<void> {
        WHERE status <> 'completed';`,
   )
 
+  // 个人版不再给「仅自己」写入演示随手记。这里只清理由稳定幂等键创建的
+  // 系统记录，并永久记录已处理状态，避免旧客户端或清缓存后再次补种。
+  await p.query(`
+    INSERT INTO t_user_seed_state (user_id, seed)
+    SELECT DISTINCT user_id,
+           CASE client_request_id
+             WHEN 'seed:diary_welcome' THEN 'diary_welcome'
+             ELSE 'diary_tomato_eggs'
+           END
+      FROM t_entry
+     WHERE owner_type = 'personal'
+       AND client_request_id IN ('seed:diary_welcome', 'seed:diary_tomato_eggs')
+    ON CONFLICT (user_id, seed)
+    DO UPDATE SET updated_at = now();
+
+    UPDATE t_entry
+       SET deleted = TRUE, updated_at = now()
+     WHERE owner_type = 'personal'
+       AND client_request_id IN ('seed:diary_welcome', 'seed:diary_tomato_eggs')
+       AND deleted = FALSE;
+  `)
+
   // 官方体验圈使用独立系统账号发布内置内容，但由一个真实微信账号担任管理员。
   // 这里每次启动都幂等校正，既能迁移已经由 id=1 创建的旧体验圈，也能在
   // 全新空库中直接创建；内置记录使用稳定 client_request_id，重复部署不重复。
@@ -1071,7 +1093,7 @@ export async function ensureSchema(): Promise<void> {
     )
     SELECT official.id, 'anniversary', '一起认真生活的小约定',
            '选一个期待的日子，让约定不只停留在“下次一定”。',
-           current_date + 7, (current_date + 7)::timestamp + interval '10 hours', 'none', TRUE,
+           DATE '2027-01-01', TIMESTAMP '2027-01-01 10:00:00', 'none', TRUE,
            FALSE, 'space', s.id, 'space', 'commitment', '{}'::jsonb,
            '[]', 'official-experience-commitment-v1'
       FROM t_space s
@@ -1079,6 +1101,20 @@ export async function ensureSchema(): Promise<void> {
      WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
+
+    -- 官方新年约定使用固定展示日期；已有环境也要同步校正，不能只影响新库。
+    UPDATE t_entry e
+       SET event_date = DATE '2027-01-01',
+           event_at = TIMESTAMP '2027-01-01 10:00:00',
+           updated_at = now()
+      FROM t_space s, t_user official
+     WHERE e.space_id = s.id
+       AND s.official_key = 'daykeep-experience'
+       AND official.openid = 'system:daykeep-official'
+       AND e.user_id = official.id
+       AND e.client_request_id = 'official-experience-commitment-v1'
+       AND (e.event_date <> DATE '2027-01-01'
+         OR e.event_at <> TIMESTAMP '2027-01-01 10:00:00');
 
     INSERT INTO t_entry (
       user_id, type, title, body, event_date, event_at, show_in_timeline,

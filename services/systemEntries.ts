@@ -7,16 +7,13 @@
  * 2. 今年 — 自上年 12-31 锚点，展示「已经」= 今年第几天（实时）
  * 3. 给自己的小约定 — 未来 7 天
  *
- * 内置随手记（可多条；老用户会按 seed 补种缺失项）：
- * 1. diary_welcome — 欢迎文案 + 三张系统配图
- * 2. diary_tomato_eggs — 「西红柿炒蛋」示例 + 一张系统配图
+ * 个人版不再向「仅自己」写入演示随手记；历史版本写入的两条演示会被安全清理。
  */
 import { fetchMe, getCachedUserId } from '@/services/auth'
 import {
   createEntry,
   updateEntry,
   deleteEntry,
-  getEntrySeedState,
   markEntrySeeds,
   type Entry,
   type EntryInput,
@@ -161,7 +158,7 @@ type DiarySeedDef = {
   textHints: string[]
 }
 
-const DIARY_SEEDS: DiarySeedDef[] = [
+const RETIRED_DIARY_SEEDS: DiarySeedDef[] = [
   {
     seed: 'diary_welcome',
     title: '欢迎来到只我们',
@@ -303,22 +300,16 @@ export function displayDiaryBody(body: string) {
   return (body || '').replace(/__dk_seed:[\w-]+__/g, '').trim()
 }
 
-/** 列表层兜底：每种内置随手记只留一条 */
+/** 列表层兜底：退休的演示记录不再出现在「仅自己」中。 */
 export function dedupeWelcomeDiaries(list: Entry[]): Entry[] {
-  let next = list
-  for (const def of DIARY_SEEDS) {
-    const rows = next.filter((item) => matchDiarySeed(item, def))
-    if (rows.length <= 1) continue
-    const keep = [...rows].sort((a, b) => diarySeedScore(b, def) - diarySeedScore(a, def))[0]
-    const drop = new Set(rows.filter((item) => item.id !== keep.id).map((item) => item.id))
-    next = next.filter((item) => !drop.has(item.id))
-  }
-  return next
+  return list.filter(
+    (item) => !RETIRED_DIARY_SEEDS.some((def) => matchDiarySeed(item, def)),
+  )
 }
 
 /**
- * 首次无随手记时写入内置示例；已有欢迎日记的老用户会补种「西红柿炒蛋」。
- * 服务端按用户永久记录 seed；删除、清缓存或换设备后均不会再次补种。
+ * 清理历史版本写入的个人演示随手记。只匹配稳定 seed、系统配图和旧版固定文案，
+ * 用户自行创建的普通记录不会被删除。
  */
 export async function ensureDiarySeed(existing: Entry[]): Promise<Entry[]> {
   let userId: string | number
@@ -333,110 +324,32 @@ export async function ensureDiarySeed(existing: Entry[]): Promise<Entry[]> {
   const running = diarySeedTasks.get(taskKey)
   if (running) return running
 
-    const task = (async () => {
-    let list = dedupeWelcomeDiaries([...existing])
+  const task = (async () => {
     const flags = readDiarySeedFlags(userId)
-    let dirtyFlags = false
-    const seedsToMark = new Set<string>()
-
-    // 服务端状态是最终依据；本地标记只在接口短暂不可用时充当兼容兜底。
-    try {
-      const serverSeeds = await getEntrySeedState()
-      for (const seed of serverSeeds) {
-        if (!flags[seed]) {
-          flags[seed] = true
-          dirtyFlags = true
-        }
-      }
-    } catch (error) {
-      console.warn('[seed] pull diary seed state failed, fallback to local state', error)
+    const retiredRows = existing.filter((item) =>
+      RETIRED_DIARY_SEEDS.some((def) => matchDiarySeed(item, def)),
+    )
+    if (retiredRows.length) {
+      await Promise.all(
+        retiredRows.map((item) =>
+          deleteEntry(item.id).catch((error) =>
+            console.warn('[seed] remove retired personal diary failed', item.id, error),
+          ),
+        ),
+      )
     }
 
-    for (const def of DIARY_SEEDS) {
-      const rows = list.filter((item) => matchDiarySeed(item, def))
-      if (rows.length) {
-        const keep = [...rows].sort((a, b) => diarySeedScore(b, def) - diarySeedScore(a, def))[0]
-        const duplicateIds = new Set(rows.filter((item) => item.id !== keep.id).map((item) => item.id))
-        if (duplicateIds.size) {
-          await Promise.all(
-            [...duplicateIds].map((id) =>
-              deleteEntry(id).catch((error) =>
-                console.warn('[seed] remove duplicate diary failed', id, error),
-              ),
-            ),
-          )
-          list = list.filter((item) => !duplicateIds.has(item.id))
-        }
-
-        const patch: Partial<EntryInput> = {}
-        if (keep.pinned) patch.pinned = false
-        const keepBody = keep.body || ''
-        const expectedBody = diarySeedBody(def)
-        if (looksLikeGarbageDiaryBody(keepBody) && def.seed === 'diary_welcome') {
-          patch.body = expectedBody
-          patch.title = def.title
-        } else if (
-          def.textHints.some((hint) => keepBody.includes(hint)) &&
-          (!hasSeedMarker(keep, def.seed) || displayDiaryBody(keepBody) !== def.text)
-        ) {
-          // 无标记，或正文与最新内置文案不一致（如缺「西红柿炒蛋～」）时回写
-          patch.body = expectedBody
-          patch.title = def.title
-        }
-        const imgs = keep.images || []
-        const needsSystemImages =
-          !imgs.length ||
-          imgs.some((src) => String(src).includes('/static/system-diary/')) ||
-          (def.seed === 'diary_tomato_eggs' &&
-            !imgs.some((src) => String(src).includes('tomato-eggs')))
-        if (needsSystemImages) patch.images = [...def.images]
-
-        if (Object.keys(patch).length) {
-          try {
-            const updated = await updateEntry(keep.id, patch)
-            list = list.map((item) => (item.id === updated.id ? updated : item))
-          } catch (error) {
-            console.warn('[seed] normalize diary failed', keep.id, error)
-            if (patch.pinned === false) {
-              list = list.map((item) =>
-                item.id === keep.id ? { ...item, pinned: false } : item,
-              )
-            }
-          }
-        }
-
-        if (!flags[def.seed]) {
-          flags[def.seed] = true
-          dirtyFlags = true
-        }
-        seedsToMark.add(def.seed)
-        continue
-      }
-
-      // 服务端或本地已标记且列表没有 → 视为用户删过，不再补种。
-      if (flags[def.seed]) continue
-
+    const retiredSeeds = RETIRED_DIARY_SEEDS.map((def) => def.seed)
+    for (const seed of retiredSeeds) flags[seed] = true
+    writeDiarySeedFlags(userId, flags)
+    if (retiredSeeds.length) {
       try {
-        const row = await createEntry(diarySeedInput(def))
-        list = [row, ...list]
-        flags[def.seed] = true
-        dirtyFlags = true
-        seedsToMark.add(def.seed)
+        await markEntrySeeds(retiredSeeds)
       } catch (error) {
-        console.warn(`[seed] diary ${def.seed} failed`, error)
+        console.warn('[seed] persist retired diary seed state failed', error)
       }
     }
-
-    if (dirtyFlags) writeDiarySeedFlags(userId, flags)
-    if (seedsToMark.size) {
-      try {
-        await markEntrySeeds([...seedsToMark])
-      } catch (error) {
-        // 创建接口本身也会写入服务端状态；这里主要用于回填无标记的旧数据。
-        console.warn('[seed] persist diary seed state failed', error)
-      }
-    }
-    return dedupeWelcomeDiaries(list)
+    return dedupeWelcomeDiaries(existing)
   })()
 
   diarySeedTasks.set(taskKey, task)

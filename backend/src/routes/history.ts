@@ -178,7 +178,7 @@ async function fetchWikimedia(month: number, day: number): Promise<HistoryPayloa
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'Daykeep/0.1',
+        'User-Agent': 'Daykeep/0.1 (https://daykeep.cn)',
       },
     })
     if (!response.ok) throw new Error(`history provider responded ${response.status}`)

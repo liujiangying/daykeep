@@ -661,11 +661,19 @@ spacesRouter.put('/:id', async (req, res) => {
     if (isRateLimited(`space:update:user:${uid}`, 20, 60_000)) {
       return res.status(429).json({ code: 429, msg: '操作过于频繁，请稍后再试' })
     }
-    const owner = await queryOne<{ id: string }>(
-      `SELECT id::text FROM t_space WHERE id = $1 AND owner_id = $2 AND dissolved_at IS NULL`,
+    const manager = await queryOne<{ id: string }>(
+      `SELECT s.id::text
+         FROM t_space s
+         LEFT JOIN t_space_member sm ON sm.space_id = s.id AND sm.user_id = $2
+        WHERE s.id = $1
+          AND s.dissolved_at IS NULL
+          AND (
+            s.owner_id = $2
+            OR (s.is_official = TRUE AND s.access_type = 'public' AND sm.role = 'admin')
+          )`,
       [id, req.userId],
     )
-    if (!owner) return res.status(403).json({ code: 403, msg: '只有创建者可以修改时光圈' })
+    if (!manager) return res.status(403).json({ code: 403, msg: '只有创建者或官方管理员可以修改时光圈' })
     const body = req.body || {}
     const name = String(body.name || '').trim().slice(0, 64)
     const keywords = normalizeKeywords(body.keywords)
@@ -736,7 +744,7 @@ spacesRouter.get('/:id/members', async (req, res) => {
   }
 })
 
-/** 只有创建者可以任命或取消其他管理员。 */
+/** 官方管理员可以任命或取消其他管理员。 */
 spacesRouter.put('/:id/members/:userId/role', async (req, res) => {
   try {
     const id = String(req.params.id || '')
@@ -745,13 +753,10 @@ spacesRouter.put('/:id/members/:userId/role', async (req, res) => {
     if (!/^\d+$/.test(id) || !/^\d+$/.test(targetUserId) || !role) {
       return res.status(400).json({ code: 400, msg: '管理员设置无效' })
     }
-    const space = await queryOne<{ ownerId: string }>(
-      `SELECT owner_id::text AS "ownerId" FROM t_space
-        WHERE id = $1 AND owner_id = $2 AND is_official = TRUE AND access_type = 'public'`,
-      [id, req.userId],
-    )
-    if (!space) return res.status(403).json({ code: 403, msg: '只有创建者可以设置管理员' })
-    if (targetUserId === space.ownerId) return res.status(409).json({ code: 409, msg: '创建者始终是管理员' })
+    const moderator = await requireOfficialModerator(id, req.userId)
+    if (!moderator) return res.status(403).json({ code: 403, msg: '只有官方管理员可以设置管理员' })
+    if (targetUserId === moderator.ownerId) return res.status(409).json({ code: 409, msg: '官方账号始终是圈主' })
+    if (targetUserId === String(req.userId)) return res.status(409).json({ code: 409, msg: '不能修改自己的管理权限' })
     const updated = await query<{ userId: string }>(
       `UPDATE t_space_member SET role = $3, updated_at = now()
         WHERE space_id = $1 AND user_id = $2 AND role <> 'owner'
@@ -967,15 +972,23 @@ spacesRouter.delete('/:id/members/me', async (req, res) => {
   }
 })
 
-/** 创建者移除成员；已有共同内容继续留在圈中，权限从移除后立即失效。 */
+/** 创建者（或官方圈管理员）移除成员；已有共同内容继续留在圈中。 */
 spacesRouter.delete('/:id/members/:userId', async (req, res) => {
   try {
     const id = String(req.params.id || '')
     const targetUserId = String(req.params.userId || '')
     if (!/^\d+$/.test(id) || !/^\d+$/.test(targetUserId)) return res.status(400).json({ code: 400, msg: 'invalid id' })
-    const owner = await queryOne(`SELECT 1 AS ok FROM t_space WHERE id = $1 AND owner_id = $2`, [id, req.userId])
-    if (!owner) return res.status(403).json({ code: 403, msg: '只有创建者可以移除成员' })
-    if (targetUserId === String(req.userId)) return res.status(409).json({ code: 409, msg: '不能移除创建者' })
+    const manager = await queryOne<{ ownerId: string }>(
+      `SELECT s.owner_id::text AS "ownerId"
+         FROM t_space s
+         LEFT JOIN t_space_member sm ON sm.space_id = s.id AND sm.user_id = $2
+        WHERE s.id = $1
+          AND (s.owner_id = $2 OR (s.is_official = TRUE AND s.access_type = 'public' AND sm.role = 'admin'))`,
+      [id, req.userId],
+    )
+    if (!manager) return res.status(403).json({ code: 403, msg: '只有创建者或官方管理员可以移除成员' })
+    if (targetUserId === manager.ownerId) return res.status(409).json({ code: 409, msg: '不能移除圈主' })
+    if (targetUserId === String(req.userId)) return res.status(409).json({ code: 409, msg: '不能移除自己' })
     const removed = await query(`DELETE FROM t_space_member WHERE space_id = $1 AND user_id = $2 RETURNING id`, [id, targetUserId])
     if (!removed.length) return res.status(404).json({ code: 404, msg: '成员不存在' })
     return res.json({ code: 0, data: { ok: true } })

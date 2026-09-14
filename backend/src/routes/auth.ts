@@ -10,6 +10,7 @@ import {
   type UserPrefs,
 } from '../lib/prefs.js'
 import { clientMessage } from '../lib/clientError.js'
+import { normalizeUserAsset } from '../cos.js'
 import { maskPhone } from '../lib/phone.js'
 
 type PublicUser = {
@@ -734,7 +735,12 @@ authRouter.patch('/me', requireAuth, async (req, res) => {
       const n = String(req.body.nickname).trim().slice(0, 64)
       nickname = n || '微信用户'
     }
-    const avatarUrl = req.body?.avatarUrl != null ? String(req.body.avatarUrl).slice(0, 512) : undefined
+    const avatarUrl = req.body?.avatarUrl != null
+      ? normalizeUserAsset(req.body.avatarUrl, req.userId!, ['avatar'])
+      : undefined
+    if (avatarUrl == null) {
+      return res.status(400).json({ code: 400, msg: '头像地址不合法' })
+    }
     const row = await queryOne(
       `UPDATE t_user SET
          nickname = COALESCE($2, nickname),

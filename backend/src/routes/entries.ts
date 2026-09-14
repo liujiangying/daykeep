@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 import multer from 'multer'
 import { getPool, query, queryOne } from '../db.js'
 import { requireAuth } from '../auth.js'
-import { buildObjectKey, putObject } from '../cos.js'
+import { buildObjectKey, normalizeStoredAsset, normalizeUserAsset, putObject } from '../cos.js'
 
 const bgUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } })
 
@@ -110,15 +110,19 @@ const SELECT_FIELDS = `
   updated_at AS "updatedAt"
 `
 
-function parseImages(raw: unknown): string[] {
+function parseImages(raw: unknown, userId?: string | number): string[] {
+  const normalize = (value: string) => {
+    if (userId == null) return normalizeStoredAsset(value)
+    return normalizeUserAsset(value, userId, ['entry'])
+  }
   if (Array.isArray(raw)) {
-    return raw.filter((x) => typeof x === 'string').slice(0, 9)
+    return raw.filter((x) => typeof x === 'string').map(normalize).filter((x): x is string => !!x).slice(0, 9)
   }
   if (typeof raw === 'string') {
     try {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed)) {
-        return parsed.filter((x) => typeof x === 'string').slice(0, 9)
+        return parsed.filter((x) => typeof x === 'string').map(normalize).filter((x): x is string => !!x).slice(0, 9)
       }
     } catch {
       /* ignore */
@@ -1148,9 +1152,13 @@ entriesRouter.post('/', async (req, res) => {
       if (scheduleError) return res.status(400).json({ code: 400, msg: scheduleError })
     }
     const color = String(b.color || '').slice(0, 16)
-    const backgroundUrl = String(b.backgroundUrl || '').slice(0, 512)
+    const normalizedBackgroundUrl = normalizeUserAsset(b.backgroundUrl, req.userId!, ['background'])
+    if (normalizedBackgroundUrl == null) {
+      return res.status(400).json({ code: 400, msg: '背景图片地址不合法' })
+    }
+    const backgroundUrl = normalizedBackgroundUrl.slice(0, 512)
     const todoStatus = type === 'todo' ? String(b.todoStatus || 'pending').slice(0, 16) : null
-    const imagesJson = JSON.stringify(parseImages(b.images))
+    const imagesJson = JSON.stringify(parseImages(b.images, req.userId))
     const tagsJson = JSON.stringify(normalizeTags(b.tags))
     // 约定要写地点：只放开随手记会让「发起约定」填的地点在 create 时被静默丢掉，
     // 前端表单看起来生效、列表里永远没有地点。
@@ -1434,8 +1442,14 @@ entriesRouter.put('/:id', async (req, res) => {
 
     const recurring = repeatRule != null ? repeatRule !== 'none' : undefined
     const imagesJson =
-      b.images != null ? JSON.stringify(parseImages(b.images)) : null
+      b.images != null ? JSON.stringify(parseImages(b.images, req.userId)) : null
     const tagsJson = b.tags != null ? JSON.stringify(normalizeTags(b.tags)) : null
+    const backgroundUrl = b.backgroundUrl != null
+      ? normalizeUserAsset(b.backgroundUrl, req.userId!, ['background'])?.slice(0, 512)
+      : undefined
+    if (b.backgroundUrl != null && backgroundUrl == null) {
+      return res.status(400).json({ code: 400, msg: '背景图片地址不合法' })
+    }
     const eventAt =
       b.eventAt != null
         ? normalizeEventAt(b.eventAt, eventDate || existing.eventDate)
@@ -1628,7 +1642,7 @@ entriesRouter.put('/:id', async (req, res) => {
         todoStatus ?? null,
         b.color != null ? String(b.color).slice(0, 16) : null,
         imagesJson,
-        b.backgroundUrl != null ? String(b.backgroundUrl).slice(0, 512) : null,
+        backgroundUrl !== undefined ? backgroundUrl.slice(0, 512) : null,
         nextLocation,
         wxSubscribeAccepted,
         hasCapsuleUnlockAt,

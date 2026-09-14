@@ -34,7 +34,8 @@ npm run build --prefix backend
 - 仅提交 `.env.example`，不提交真实 `.env` 文件。
 - 数据库、微信密钥、对象存储和公网地址均通过环境变量提供。
 - `website/site-config.js` 默认为空配置，部署时再填写个人环境信息。
-- 仓库不包含特定部署平台的配置文件。
+- 仓库不包含司内基础设施配置；个人版轻量服务器部署说明见
+  [`deploy/personal/README.md`](./deploy/personal/README.md)。
 
 ## License
 

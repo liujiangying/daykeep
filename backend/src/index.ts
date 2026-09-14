@@ -15,6 +15,7 @@ import { insightsRouter } from './routes/insights.js'
 import { analyticsRouter } from './routes/analytics.js'
 import { loadRuntimeEnv } from './runtimeEnv.js'
 import { notifyOperationalAlert } from './alerts.js'
+import { resolveObjectReferences } from './cos.js'
 
 await loadRuntimeEnv()
 
@@ -27,6 +28,22 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
   if (req.method === 'OPTIONS') return res.sendStatus(204)
+  next()
+})
+
+// COS 保持私有：数据库保存 cos:// 引用，发给客户端前再生成短期签名地址。
+app.use((_req, res, next) => {
+  const sendJson = res.json.bind(res)
+  res.json = ((body: unknown) => {
+    void resolveObjectReferences(body)
+      .then((resolved) => sendJson(resolved))
+      .catch((error) => {
+        console.error('[cos] failed to sign response assets', error)
+        if (!res.headersSent) sendJson({ code: 500, msg: '资源地址生成失败' })
+        else res.end()
+      })
+    return res
+  }) as typeof res.json
   next()
 })
 

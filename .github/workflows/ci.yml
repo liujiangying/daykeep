@@ -10,6 +10,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: daykeep
+          POSTGRES_USER: daykeep
+          POSTGRES_PASSWORD: daykeep-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U daykeep -d daykeep"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -30,6 +44,9 @@ jobs:
       - name: Type check frontend
         run: npm run type-check
 
+      - name: Lint
+        run: npm run lint
+
       - name: Run tests
         run: npm test
 
@@ -39,3 +56,33 @@ jobs:
       - name: Build backend
         run: npm run build
         working-directory: backend
+
+      - name: Smoke test API and reminder worker
+        env:
+          NODE_ENV: production
+          DATABASE_URL: postgresql://daykeep:daykeep-ci-only@127.0.0.1:5432/daykeep
+          JWT_SECRET: ci-jwt-secret-at-least-32-bytes-long
+          REFRESH_SECRET: ci-refresh-secret-at-least-32-bytes-long
+          REMINDER_SCHEDULER_ENABLED: "0"
+        run: |
+          npm run start --prefix backend > /tmp/daykeep-api.log 2>&1 &
+          api_pid=$!
+          worker_pid=''
+          trap 'kill "$api_pid" ${worker_pid:-} 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/readyz >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:3000/readyz >/dev/null || {
+            cat /tmp/daykeep-api.log
+            exit 1
+          }
+          WORKER_HEALTH_PORT=3001 npm run start:worker --prefix backend > /tmp/daykeep-worker.log 2>&1 &
+          worker_pid=$!
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3001/readyz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/daykeep-api.log
+          cat /tmp/daykeep-worker.log
+          exit 1

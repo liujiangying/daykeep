@@ -4,18 +4,19 @@
 FROM node:20-alpine AS build
 WORKDIR /app/backend
 COPY backend/package.json backend/package-lock.json* ./
-RUN npm install --no-audit --no-fund
+RUN npm ci --no-audit --no-fund
 COPY backend/tsconfig.json ./
 COPY backend/src ./src
 COPY shared /app/shared
 COPY subpackages/shared/dailyQuestionBank.ts /app/subpackages/shared/dailyQuestionBank.ts
+COPY subpackages/shared/package.json /app/subpackages/shared/package.json
 RUN npm run build
 
 FROM node:20-alpine
 ENV NODE_ENV=production
 WORKDIR /app/backend
 COPY backend/package.json backend/package-lock.json* ./
-RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --from=build /app/backend/dist ./dist
 # 官网静态页与 API 同域托管（不带 README 等文档进镜像）
 COPY website /app/website

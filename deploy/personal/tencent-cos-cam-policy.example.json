@@ -1,0 +1,20 @@
+{
+  "version": "2.0",
+  "statement": [
+    {
+      "effect": "allow",
+      "action": [
+        "cos:GetObject",
+        "cos:HeadObject",
+        "cos:PutObject",
+        "cos:InitiateMultipartUpload",
+        "cos:UploadPart",
+        "cos:CompleteMultipartUpload",
+        "cos:AbortMultipartUpload"
+      ],
+      "resource": [
+        "qcs::cos:ap-guangzhou:uid/1395841815:lhcos-2cf51-1395841815/daykeep/*"
+      ]
+    }
+  ]
+}

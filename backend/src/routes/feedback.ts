@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 import multer from 'multer'
 import { attachOptionalAuth } from '../auth.js'
 import { config } from '../config.js'
-import { buildFeedbackObjectKey, putObject, publicUrl } from '../cos.js'
+import { buildFeedbackObjectKey, putObject, toObjectReference } from '../cos.js'
 import { queryOne } from '../db.js'
 import { sanitizeImageBuffer } from '../lib/imageValidation.js'
 import { clientMessage } from '../lib/clientError.js'
@@ -56,11 +56,10 @@ function clientMeta(body: any) {
 
 function validImageUrls(value: unknown) {
   if (!Array.isArray(value)) return []
-  const expectedPrefix = publicUrl(`${config.cos.prefix}/feedback/`).replace(/\/$/, '')
   return value
     .filter((item): item is string => typeof item === 'string')
-    .map((item) => item.trim())
-    .filter((item) => item.startsWith(expectedPrefix))
+    .map((item) => toObjectReference(item))
+    .filter((item): item is string => !!item && item.startsWith(`cos://${config.cos.prefix}/feedback/`))
     .slice(0, 3)
 }
 

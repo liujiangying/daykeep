@@ -2,11 +2,11 @@ import { Router } from 'express'
 import crypto from 'node:crypto'
 import type { PoolClient } from 'pg'
 import { requireAuth } from '../auth.js'
-import { config } from '../config.js'
 import { getPool, query, queryOne } from '../db.js'
 import { isRateLimited, looksLikeAttackPayload } from '../lib/rateLimit.js'
 import { purgeExpiredSpaces } from '../spaceLifecycle.js'
 import { isMoodValue } from '../../../shared/mood.js'
+import { normalizeUserAsset } from '../cos.js'
 
 export const spacesRouter = Router()
 
@@ -146,17 +146,11 @@ function normalizeKeywords(input: unknown): string[] {
 }
 
 /** 封面 URL 只能来自本服务配置的 COS/CDN，阻止任意外链进入分享卡。 */
-function normalizeCoverUrl(input: unknown): string | null {
+function normalizeCoverUrl(input: unknown, userId: string | number): string | null {
   const raw = String(input || '').trim()
   if (!raw) return ''
-  try {
-    const parsed = new URL(raw)
-    const allowedHost = (config.cos.publicHost || `${config.cos.bucket}.cos.${config.cos.region}.myqcloud.com`).toLowerCase()
-    if (parsed.protocol !== 'https:' || parsed.host.toLowerCase() !== allowedHost) return null
-    return parsed.toString().slice(0, 512)
-  } catch {
-    return null
-  }
+  const normalized = normalizeUserAsset(raw, userId, ['space-cover'])
+  return normalized?.startsWith('cos://') ? normalized : null
 }
 
 function normalizeSpace(row: SpaceRow, members: MemberRow[] = [], currentUserRole = '') {
@@ -340,7 +334,7 @@ spacesRouter.post('/', async (req, res) => {
     }
     const type = body.type === 'group' ? 'group' : 'pair'
     const keywords = normalizeKeywords(body.keywords)
-    const coverUrl = normalizeCoverUrl(body.coverUrl)
+    const coverUrl = normalizeCoverUrl(body.coverUrl, req.userId!)
     if (coverUrl == null) return res.status(400).json({ code: 400, msg: '封面地址不合法' })
     if (
       looksLikeAttackPayload(name) ||
@@ -676,7 +670,7 @@ spacesRouter.put('/:id', async (req, res) => {
     const name = String(body.name || '').trim().slice(0, 64)
     const keywords = normalizeKeywords(body.keywords)
     const hasCoverUrl = Object.prototype.hasOwnProperty.call(body, 'coverUrl')
-    const coverUrl = hasCoverUrl ? normalizeCoverUrl(body.coverUrl) : ''
+    const coverUrl = hasCoverUrl ? normalizeCoverUrl(body.coverUrl, req.userId!) : ''
     if (coverUrl == null) return res.status(400).json({ code: 400, msg: '封面地址不合法' })
     if (
       (name && looksLikeAttackPayload(name)) ||

@@ -6,6 +6,7 @@ import { attachOptionalAuth, requireAuth } from '../auth.js'
 import { daysUntil, normalizeRepeatRule, type RepeatRule } from '../lib/countdown.js'
 import { isRateLimited, looksLikeAttackPayload } from '../lib/rateLimit.js'
 import { clientMessage } from '../lib/clientError.js'
+import { normalizeUserAsset } from '../cos.js'
 
 export const collaborateRouter = Router()
 
@@ -592,7 +593,10 @@ collaborateRouter.post('/:entryId/collaborate/moments', async (req, res) => {
     const momentType = type === 'photo' ? 'photo' : 'note'
     const text = String(body || '')
     const imageList = Array.isArray(images)
-      ? images.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 9)
+      ? images
+        .map((item) => normalizeUserAsset(item, req.userId!, ['entry']))
+        .filter((item): item is string => !!item)
+        .slice(0, 9)
       : []
 
     if (!text.trim() && imageList.length === 0) {

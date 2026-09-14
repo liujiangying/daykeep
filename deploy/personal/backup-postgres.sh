@@ -42,6 +42,7 @@ docker run --rm \
   -e RCLONE_CONFIG_COS_ACCESS_KEY_ID="$COS_SECRET_ID" \
   -e RCLONE_CONFIG_COS_SECRET_ACCESS_KEY="$COS_SECRET_KEY" \
   -e RCLONE_CONFIG_COS_ENDPOINT="cos.${COS_REGION}.myqcloud.com" \
+  -e RCLONE_CONFIG_COS_NO_CHECK_BUCKET=true \
   rclone/rclone:1.71 copyto "/data/$FILE" "cos:${COS_BUCKET}/${COS_PREFIX}/backups/postgres/$FILE"
 
 find "$BACKUP_DIR" -type f -name 'daykeep_*.dump' -mtime "+$BACKUP_RETENTION_DAYS" -delete

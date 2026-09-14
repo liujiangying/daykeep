@@ -972,14 +972,18 @@ export async function ensureSchema(): Promise<void> {
   // 这里每次启动都幂等校正，既能迁移已经由 id=1 创建的旧体验圈，也能在
   // 全新空库中直接创建；内置记录使用稳定 client_request_id，重复部署不重复。
   const officialAvatarUrl = String(process.env.OFFICIAL_AVATAR_URL || '').trim()
+  // node-postgres 的参数化查询只能包含一条 SQL，系统账号先单独 upsert；
+  // 后面的多条幂等迁移保持 simple query，避免线上启动时报 42601。
+  await p.query(
+    `INSERT INTO t_user (openid, nickname, avatar_url)
+     VALUES ('system:daykeep-official', '只我们官方', $1)
+     ON CONFLICT (openid) DO UPDATE SET
+       nickname = '只我们官方',
+       avatar_url = EXCLUDED.avatar_url,
+       updated_at = now()`,
+    [officialAvatarUrl],
+  )
   await p.query(`
-    INSERT INTO t_user (openid, nickname, avatar_url)
-    VALUES ('system:daykeep-official', '只我们官方', $1)
-    ON CONFLICT (openid) DO UPDATE SET
-      nickname = '只我们官方',
-      avatar_url = EXCLUDED.avatar_url,
-      updated_at = now();
-
     INSERT INTO t_space (
       owner_id, name, type, keywords, cover_url,
       access_type, join_policy, post_policy, is_official, official_key
@@ -1093,7 +1097,7 @@ export async function ensureSchema(): Promise<void> {
      WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
-  `, [officialAvatarUrl])
+  `)
 
   console.log('[pg] schema ready')
 

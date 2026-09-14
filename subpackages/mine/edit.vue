@@ -1,8 +1,8 @@
 <template>
   <view class="page" :style="pageStyle">
     <view class="intro">
-      <text class="intro-title">设置你的个人资料</text>
-      <text class="intro-desc">在共同记录和分享时，让朋友更容易认出你</text>
+      <text class="intro-title">{{ fromLogin ? '进入圈子前，先介绍自己' : '设置你的个人资料' }}</text>
+      <text class="intro-desc">选择微信头像并确认昵称，让圈内的人知道你是谁</text>
     </view>
 
     <view class="profile-card">
@@ -81,7 +81,6 @@
         :disabled="saving"
         @tap="onSave"
       >保存</button>
-      <text v-if="fromLogin" class="later" @tap="finishOnboarding">稍后再设置</text>
     </view>
   </view>
 </template>
@@ -193,10 +192,8 @@ async function chooseAvatar() {
 }
 
 function finishOnboarding() {
-  uni.switchTab({
-    url: '/pages/timeline/index',
-    fail: () => uni.reLaunch({ url: '/pages/timeline/index' }),
-  })
+  // 回到登录入口统一处理 onboarding 或邀请链接，避免资料设置后丢失原目标。
+  uni.reLaunch({ url: '/pages/login/login' })
 }
 
 async function onSave() {

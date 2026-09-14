@@ -462,7 +462,7 @@ spacesRouter.post('/official-experience/join', async (req, res) => {
     )
     await query(
       `INSERT INTO t_space_member (space_id, user_id, role, nickname, avatar_url)
-       SELECT $1, id, CASE WHEN id = 1 THEN 'owner' ELSE 'member' END, nickname, avatar_url
+       SELECT $1, id, 'member', nickname, avatar_url
          FROM t_user WHERE id = $2
        ON CONFLICT (space_id, user_id) DO UPDATE SET updated_at = now()`,
       [space.id, req.userId],

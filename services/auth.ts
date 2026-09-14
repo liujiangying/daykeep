@@ -51,6 +51,26 @@ export function hasCompleteProfile(user: DayKeepUser | null | undefined): boolea
 }
 
 /**
+ * 登录后的统一资料门槛：首次参与任何空间前，先由用户主动选择微信头像并确认昵称。
+ * 微信小程序不再支持静默读取资料，因此这里跳转到包含 chooseAvatar 和 nickname
+ * 原生控件的资料页；接口暂时不可用时不制造跳转死循环。
+ */
+export async function ensureRequiredProfile(): Promise<boolean> {
+  if (!isLoggedIn()) return false
+  try {
+    const user = await fetchMe()
+    if (hasCompleteProfile(user)) return true
+    const route = String(getCurrentPages?.().slice(-1)[0]?.route || '')
+    if (route === 'subpackages/mine/edit') return false
+    uni.reLaunch({ url: '/subpackages/mine/edit?fromLogin=1' })
+    return false
+  } catch {
+    // 登录态校验和请求层会处理失效会话；普通网络波动不强制卡死用户。
+    return true
+  }
+}
+
+/**
  * 在共同记录、分享等“资料会被别人看到”的场景轻量提醒。
  * 返回 true 表示继续当前操作；用户选择去设置时返回 false。
  */

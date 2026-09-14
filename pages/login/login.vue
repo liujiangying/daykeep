@@ -106,6 +106,7 @@ import {
   isDevLoginAvailable,
   isOfficeNetworkError,
   isSessionBoundaryError,
+  ensureRequiredProfile,
 } from '@/services/auth'
 import { shouldShowOnboarding } from '@/services/onboarding'
 
@@ -142,7 +143,8 @@ const canPhoneLogin = computed(() => isPhoneValid.value && /^\d{6}$/.test(smsCod
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
-function goHome() {
+async function goHome() {
+  if (!await ensureRequiredProfile()) return
   let redirect = ''
   try {
     const pending = String(uni.getStorageSync(POST_LOGIN_REDIRECT_KEY) || '')
@@ -192,7 +194,7 @@ async function ensureSession(): Promise<boolean> {
 
 onMounted(async () => {
   try {
-    if (await ensureSession()) goHome()
+    if (await ensureSession()) await goHome()
   } finally {
     checking.value = false
   }
@@ -208,7 +210,7 @@ async function onDevLogin(phoneNumber: string) {
   try {
     await devLogin(phoneNumber)
     uni.showToast({ title: '登录成功', icon: 'success' })
-    goHome()
+    await goHome()
   } catch (e: any) {
     uni.showToast({ title: e?.message || '开发者登录失败', icon: 'none' })
   } finally {
@@ -221,7 +223,7 @@ async function onWxLogin() {
   try {
     await wxLogin()
     uni.showToast({ title: '登录成功', icon: 'success' })
-    goHome()
+    await goHome()
   } catch (e: any) {
     const msg = String(e?.message || '微信登录失败')
     uni.showToast({
@@ -257,7 +259,7 @@ async function onPhoneLogin() {
   try {
     await phoneLogin(phone.value, smsCode.value)
     uni.showToast({ title: '登录成功', icon: 'success' })
-    goHome()
+    await goHome()
   } catch (e: any) {
     const msg = String(e?.message || '登录失败')
     uni.showToast({

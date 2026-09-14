@@ -1,5 +1,9 @@
 {
+  "appid": "wxfb6abe986b942c95",
+  "projectname": "daykeep-personal",
+  "compileType": "miniprogram",
   "setting": {
+    "urlCheck": false,
     "minified": true,
     "minifyWXML": true,
     "minifyWXSS": true

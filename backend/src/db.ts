@@ -968,17 +968,26 @@ export async function ensureSchema(): Promise<void> {
        WHERE status <> 'completed';`,
   )
 
-  // 官方体验圈独立于任何既有亲友圈。这里每次启动都幂等检查，而不是 runOnce：
-  // 测试库可能先建表、后创建 id=1 的管理员账号，下一次启动仍应能自动补齐。
-  // 内置记录使用稳定 client_request_id，重复部署不会重复种入。
+  // 官方体验圈使用独立系统账号，不再把首位真实微信用户误当作官方发布者。
+  // 这里每次启动都幂等校正，既能迁移已经由 id=1 创建的旧体验圈，也能在
+  // 全新空库中直接创建；内置记录使用稳定 client_request_id，重复部署不重复。
+  const officialAvatarUrl = String(process.env.OFFICIAL_AVATAR_URL || '').trim()
   await p.query(`
+    INSERT INTO t_user (openid, nickname, avatar_url)
+    VALUES ('system:daykeep-official', '只我们官方', $1)
+    ON CONFLICT (openid) DO UPDATE SET
+      nickname = '只我们官方',
+      avatar_url = EXCLUDED.avatar_url,
+      updated_at = now();
+
     INSERT INTO t_space (
       owner_id, name, type, keywords, cover_url,
       access_type, join_policy, post_policy, is_official, official_key
     )
-    SELECT 1, '只我们·体验圈', 'group', '["官方体验","一起记录","写给未来"]'::jsonb, '',
+    SELECT official.id, '只我们·体验圈', 'group', '["官方体验","一起记录","写给未来"]'::jsonb, '',
            'public', 'open', 'members', TRUE, 'daykeep-experience'
-      WHERE EXISTS (SELECT 1 FROM t_user WHERE id = 1)
+      FROM t_user official
+     WHERE official.openid = 'system:daykeep-official'
     ON CONFLICT (official_key) WHERE official_key IS NOT NULL
     DO UPDATE SET
       owner_id = EXCLUDED.owner_id,
@@ -992,23 +1001,48 @@ export async function ensureSchema(): Promise<void> {
       purge_at = NULL,
       updated_at = now();
 
+    UPDATE t_entry e
+       SET user_id = official.id, updated_at = now()
+      FROM t_space s, t_user official
+     WHERE e.space_id = s.id
+       AND s.official_key = 'daykeep-experience'
+       AND official.openid = 'system:daykeep-official'
+       AND e.client_request_id IN (
+         'official-experience-welcome-v1',
+         'official-experience-memory-v1',
+         'official-experience-commitment-v1',
+         'official-experience-capsule-v1'
+       )
+       AND e.user_id <> official.id;
+
     INSERT INTO t_space_member (space_id, user_id, role, nickname, avatar_url)
     SELECT s.id, u.id, 'owner', u.nickname, u.avatar_url
       FROM t_space s
-      JOIN t_user u ON u.id = 1
+      JOIN t_user u ON u.openid = 'system:daykeep-official'
      WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (space_id, user_id) DO UPDATE
       SET role = 'owner', nickname = EXCLUDED.nickname, avatar_url = EXCLUDED.avatar_url, updated_at = now();
+
+    UPDATE t_space_member sm
+       SET role = 'member', updated_at = now()
+      FROM t_space s, t_user official
+     WHERE sm.space_id = s.id
+       AND s.official_key = 'daykeep-experience'
+       AND official.openid = 'system:daykeep-official'
+       AND sm.user_id <> official.id
+       AND sm.role <> 'member';
 
     INSERT INTO t_entry (
       user_id, type, title, body, event_date, event_at, pinned, show_in_timeline,
       owner_type, space_id, visibility, entry_kind, images, client_request_id
     )
-    SELECT 1, 'diary', '欢迎来到只我们·体验圈',
+    SELECT official.id, 'diary', '欢迎来到只我们·体验圈',
            '这里是一个可以放心试用的公开空间。看看大家怎样记录当下、约定未来，再决定要不要建立属于自己的小圈子。',
            current_date, now(), TRUE, FALSE,
            'space', s.id, 'space', 'normal', '[]', 'official-experience-welcome-v1'
-      FROM t_space s WHERE s.official_key = 'daykeep-experience'
+      FROM t_space s
+      JOIN t_user official ON official.openid = 'system:daykeep-official'
+     WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
 
@@ -1016,11 +1050,13 @@ export async function ensureSchema(): Promise<void> {
       user_id, type, title, body, event_date, event_at, pinned, show_in_timeline,
       owner_type, space_id, visibility, entry_kind, images, client_request_id
     )
-    SELECT 1, 'diary', '今天想记住的一件小事',
+    SELECT official.id, 'diary', '今天想记住的一件小事',
            '不需要写得完整。一句话、一张照片，甚至只是此刻的心情，都可以成为以后想回来的地方。',
            current_date - 1, now() - interval '1 day', FALSE, FALSE,
            'space', s.id, 'space', 'normal', '[]', 'official-experience-memory-v1'
-      FROM t_space s WHERE s.official_key = 'daykeep-experience'
+      FROM t_space s
+      JOIN t_user official ON official.openid = 'system:daykeep-official'
+     WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
 
@@ -1029,12 +1065,14 @@ export async function ensureSchema(): Promise<void> {
       remind_enabled, owner_type, space_id, visibility, entry_kind, commitment_meta,
       images, client_request_id
     )
-    SELECT 1, 'anniversary', '一起认真生活的小约定',
+    SELECT official.id, 'anniversary', '一起认真生活的小约定',
            '选一个期待的日子，让约定不只停留在“下次一定”。',
            current_date + 7, (current_date + 7)::timestamp + interval '10 hours', 'none', TRUE,
            FALSE, 'space', s.id, 'space', 'commitment', '{}'::jsonb,
            '[]', 'official-experience-commitment-v1'
-      FROM t_space s WHERE s.official_key = 'daykeep-experience'
+      FROM t_space s
+      JOIN t_user official ON official.openid = 'system:daykeep-official'
+     WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
 
@@ -1044,16 +1082,18 @@ export async function ensureSchema(): Promise<void> {
       capsule_unlock_at, capsule_unlocked, capsule_unlock_mode,
       images, client_request_id
     )
-    SELECT 1, 'diary', '写给未来的我们',
+    SELECT official.id, 'diary', '写给未来的我们',
            '等它开启时，希望我们仍然愿意认真感受生活，也还记得今天为什么出发。',
            current_date, now(), FALSE,
            FALSE, 'space', s.id, 'space', 'capsule',
            now() + interval '90 days', FALSE, 'scheduled',
            '[]', 'official-experience-capsule-v1'
-      FROM t_space s WHERE s.official_key = 'daykeep-experience'
+      FROM t_space s
+      JOIN t_user official ON official.openid = 'system:daykeep-official'
+     WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
-  `)
+  `, [officialAvatarUrl])
 
   console.log('[pg] schema ready')
 

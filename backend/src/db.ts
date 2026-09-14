@@ -968,7 +968,7 @@ export async function ensureSchema(): Promise<void> {
        WHERE status <> 'completed';`,
   )
 
-  // 官方体验圈使用独立系统账号，不再把首位真实微信用户误当作官方发布者。
+  // 官方体验圈使用独立系统账号发布内置内容，但由一个真实微信账号担任管理员。
   // 这里每次启动都幂等校正，既能迁移已经由 id=1 创建的旧体验圈，也能在
   // 全新空库中直接创建；内置记录使用稳定 client_request_id，重复部署不重复。
   const officialAvatarUrl = String(process.env.OFFICIAL_AVATAR_URL || '').trim()
@@ -1098,6 +1098,30 @@ export async function ensureSchema(): Promise<void> {
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
   `)
+
+  // 系统账号无法登录，因此公开体验圈必须保留一个可操作的真实管理员。
+  // 生产环境可用 OFFICIAL_ADMIN_OPENID 精确指定；未配置时选最早加入的
+  // 非系统成员，用于平滑迁移已有数据。上面先幂等降级、这里再晋级，
+  // 可确保指定人永远是唯一真实管理员。
+  const officialAdminOpenid = String(process.env.OFFICIAL_ADMIN_OPENID || '').trim()
+  await p.query(
+    `WITH admin_candidate AS (
+       SELECT sm.id
+         FROM t_space_member sm
+         JOIN t_space s ON s.id = sm.space_id
+         JOIN t_user u ON u.id = sm.user_id
+        WHERE s.official_key = 'daykeep-experience'
+          AND u.openid <> 'system:daykeep-official'
+          AND ($1 = '' OR u.openid = $1)
+        ORDER BY sm.joined_at ASC, sm.id ASC
+        LIMIT 1
+     )
+     UPDATE t_space_member sm
+        SET role = 'admin', updated_at = now()
+       FROM admin_candidate candidate
+      WHERE sm.id = candidate.id`,
+    [officialAdminOpenid],
+  )
 
   console.log('[pg] schema ready')
 

@@ -60,6 +60,7 @@ import { completeOnboarding } from '@/services/onboarding'
 import { joinOfficialExperienceSpace } from '@/services/spaces'
 import { setPreferredSpaceId } from '@/services/spacePreference'
 import { trackProductEvent } from '@/services/analytics'
+import { needsInitialProfileSetup } from '@/services/auth'
 
 const { pageStyle, themeId } = useThemePage()
 const navHeight = ref(64)
@@ -80,6 +81,21 @@ function enterTimeline() {
   uni.switchTab({ url: '/pages/timeline/index' })
 }
 
+async function enterSelectedPage(next: string) {
+  const needsProfile = await needsInitialProfileSetup()
+  if (needsProfile) {
+    uni.navigateTo({
+      url: `/subpackages/mine/edit?fromLogin=1&next=${encodeURIComponent(next)}`,
+    })
+    return
+  }
+  if (next === '/pages/timeline/index') {
+    enterTimeline()
+    return
+  }
+  uni.reLaunch({ url: next })
+}
+
 function skip() {
   void trackProductEvent('onboarding_skipped')
   completeOnboarding()
@@ -94,7 +110,7 @@ async function joinOfficial() {
     void trackProductEvent('official_space_joined', { source: 'onboarding' })
     setPreferredSpaceId(space.id)
     completeOnboarding()
-    enterTimeline()
+    await enterSelectedPage('/pages/timeline/index')
   } catch (error: any) {
     uni.showToast({ title: error?.message || '暂时无法加入，请稍后再试', icon: 'none' })
   } finally {
@@ -102,14 +118,14 @@ async function joinOfficial() {
   }
 }
 
-function choose(kind: 'personal' | 'pair' | 'group') {
+async function choose(kind: 'personal' | 'pair' | 'group') {
   void trackProductEvent(kind === 'personal' ? 'onboarding_personal_selected' : 'onboarding_private_space_selected', { kind })
   completeOnboarding()
   if (kind === 'personal') {
-    enterTimeline()
+    await enterSelectedPage('/pages/timeline/index')
     return
   }
-  uni.redirectTo({ url: `/subpackages/space/create?type=${kind}&invite=1&onboarding=1` })
+  await enterSelectedPage(`/subpackages/space/create?type=${kind}&invite=1&onboarding=1`)
 }
 
 onLoad(() => {

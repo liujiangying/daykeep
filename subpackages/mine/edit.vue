@@ -1,7 +1,11 @@
 <template>
   <view class="page" :style="pageStyle">
+    <view class="topbar" :style="{ height: navHeight + 'px', paddingTop: statusBarHeight + 'px' }">
+      <view class="back-button" role="button" aria-label="返回" @tap="goBack"><view class="back-icon" /></view>
+      <text class="topbar-title">编辑资料</text>
+    </view>
     <view class="intro">
-      <text class="intro-title">{{ fromLogin ? '进入圈子前，先介绍自己' : '设置你的个人资料' }}</text>
+      <text class="intro-title">{{ fromLogin ? '先介绍一下自己' : '设置你的个人资料' }}</text>
       <text class="intro-desc">选择微信头像并确认昵称，让圈内的人知道你是谁</text>
     </view>
 
@@ -112,6 +116,9 @@ const avatarUrl = ref('')
 const saving = ref(false)
 const uploading = ref(false)
 const fromLogin = ref(false)
+const nextPage = ref('')
+const navHeight = ref(64)
+const statusBarHeight = ref(20)
 const currentMood = ref<SpaceMood>('')
 const initialMood = ref<SpaceMood>('')
 const moodOptions = MOOD_OPTIONS
@@ -148,6 +155,20 @@ async function loadProfile() {
 
 onLoad((options) => {
   fromLogin.value = options?.fromLogin === '1'
+  const rawNext = String(options?.next || '')
+  try {
+    const decoded = decodeURIComponent(rawNext)
+    if (/^\/(?:pages|subpackages)\/[A-Za-z0-9_/?=&.-]+$/.test(decoded)) nextPage.value = decoded
+  } catch { /* use fallback */ }
+  try {
+    const system = uni.getSystemInfoSync()
+    statusBarHeight.value = system.statusBarHeight || 20
+    navHeight.value = statusBarHeight.value + 44
+    // #ifdef MP-WEIXIN
+    const menu = uni.getMenuButtonBoundingClientRect()
+    if (menu?.bottom) navHeight.value = menu.bottom + Math.max(8, menu.top - (system.statusBarHeight || 20))
+    // #endif
+  } catch { /* use safe default */ }
 })
 
 onMounted(() => {
@@ -193,12 +214,23 @@ async function chooseAvatar() {
 }
 
 function finishOnboarding() {
-  uni.navigateBack({
-    fail: () => uni.switchTab({
-      url: '/pages/timeline/index',
-      fail: () => uni.reLaunch({ url: '/pages/timeline/index' }),
-    }),
-  })
+  const target = nextPage.value || '/pages/timeline/index'
+  if (target === '/pages/timeline/index') {
+    uni.switchTab({
+      url: target,
+      fail: () => uni.reLaunch({ url: target }),
+    })
+    return
+  }
+  uni.reLaunch({ url: target })
+}
+
+function goBack() {
+  if (fromLogin.value) {
+    finishOnboarding()
+    return
+  }
+  uni.navigateBack({ fail: () => uni.switchTab({ url: '/pages/mine/index' }) })
 }
 
 async function onSave() {
@@ -250,14 +282,15 @@ async function onSave() {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  padding: 52rpx 32rpx 80rpx;
+  padding: 0 32rpx 80rpx;
   background-color: var(--dk-bg, #f2f4f3);
   color: var(--dk-ink, #1c2423);
   box-sizing: border-box;
 }
+.topbar{position:relative;display:flex;align-items:center;justify-content:center;box-sizing:border-box}.topbar-title{font-size:28rpx;font-weight:600}.back-button{position:absolute;left:-20rpx;bottom:0;display:flex;width:88rpx;height:88rpx;align-items:center;justify-content:center;border:0;background:transparent;box-sizing:border-box}.back-button:active{opacity:.5}.back-icon{width:22rpx;height:22rpx;border-left:4rpx solid var(--dk-ink,#1c2423);border-bottom:4rpx solid var(--dk-ink,#1c2423);transform:rotate(45deg);box-sizing:border-box}
 
 .intro {
-  padding: 0 12rpx 32rpx;
+  padding: 28rpx 12rpx 32rpx;
 }
 .intro-title {
   display: block;

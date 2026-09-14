@@ -145,9 +145,10 @@ let countdownTimer: ReturnType<typeof setInterval> | null = null
 
 async function goHome() {
   const shouldPromptProfile = await needsInitialProfileSetup()
-  const promptProfile = () => {
-    if (!shouldPromptProfile) return
-    setTimeout(() => uni.navigateTo({ url: '/subpackages/mine/edit?fromLogin=1' }), 150)
+  const openProfileFirst = (next: string) => {
+    uni.reLaunch({
+      url: `/subpackages/mine/edit?fromLogin=1&next=${encodeURIComponent(next)}`,
+    })
   }
   let redirect = ''
   try {
@@ -159,22 +160,23 @@ async function goHome() {
     /* use home */
   }
   if (redirect) {
-    uni.reLaunch({
-      url: redirect,
-      success: promptProfile,
-      fail: () => uni.reLaunch({ url: HOME, success: promptProfile }),
-    })
+    if (shouldPromptProfile) openProfileFirst(redirect)
+    else uni.reLaunch({ url: redirect, fail: () => uni.reLaunch({ url: HOME }) })
     return
   }
   if (shouldShowOnboarding()) {
-    uni.reLaunch({ url: '/pages/onboarding/index', success: promptProfile })
+    // 首次使用先让用户选择去向，资料引导由 onboarding 在选择后展示。
+    uni.reLaunch({ url: '/pages/onboarding/index' })
+    return
+  }
+  if (shouldPromptProfile) {
+    openProfileFirst(HOME)
     return
   }
   uni.switchTab({
     url: HOME,
-    success: promptProfile,
     fail: () => {
-      uni.reLaunch({ url: HOME, success: promptProfile })
+      uni.reLaunch({ url: HOME })
     },
   })
 }

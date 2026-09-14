@@ -136,8 +136,7 @@
         {
           "path": "mine/edit",
           "style": {
-            "navigationBarTitleText": "编辑资料",
-            "navigationBarBackgroundColor": "#F7F5F1",
+            "navigationStyle": "custom",
             "navigationBarTextStyle": "black"
           }
         },

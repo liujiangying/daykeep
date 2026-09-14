@@ -6,7 +6,6 @@
     </view>
     <view class="intro">
       <text class="intro-title">{{ fromLogin ? '先介绍一下自己' : '设置你的个人资料' }}</text>
-      <text class="intro-desc">选择微信头像并确认昵称，让圈内的人知道你是谁</text>
     </view>
 
     <view class="profile-card">
@@ -38,8 +37,7 @@
           </view>
         </view>
         <!-- #endif -->
-        <text class="avatar-title">{{ avatarUrl ? '更换头像' : '选择微信头像' }}</text>
-        <text class="avatar-sub" @tap="chooseAvatar">也可拍照或从相册选择</text>
+        <text class="avatar-title">{{ avatarUrl ? '更换头像' : '选择头像' }}</text>
       </view>
 
       <view class="divider" />
@@ -56,14 +54,12 @@
           />
           <text class="input-count">{{ nickname.length }}/20</text>
         </view>
-        <text class="field-tip">昵称和头像仅用于你主动参与的记录与分享</text>
       </view>
 
       <view class="divider mood-divider" />
 
       <view class="field mood-field">
-        <text class="field-label">今日心情</text>
-        <text class="field-tip mood-tip">选择后，时光圈成员可以看到你今天的状态</text>
+        <text class="field-label">今日心情 <text class="optional">可选</text></text>
         <view class="mood-options">
           <view v-for="item in moodOptions" :key="item.value" class="mood-option" :class="{ on: currentMood === item.value }" @tap="currentMood = item.value">
             <MoodIcon :mood="item.value" size="picker" />
@@ -290,20 +286,13 @@ async function onSave() {
 .topbar{position:relative;display:flex;align-items:center;justify-content:center;box-sizing:border-box}.topbar-title{font-size:28rpx;font-weight:600}.back-button{position:absolute;left:-20rpx;bottom:0;display:flex;width:88rpx;height:88rpx;align-items:center;justify-content:center;border:0;background:transparent;box-sizing:border-box}.back-button:active{opacity:.5}.back-icon{width:22rpx;height:22rpx;border-left:4rpx solid var(--dk-ink,#1c2423);border-bottom:4rpx solid var(--dk-ink,#1c2423);transform:rotate(45deg);box-sizing:border-box}
 
 .intro {
-  padding: 28rpx 12rpx 32rpx;
+  padding: 28rpx 12rpx 26rpx;
 }
 .intro-title {
   display: block;
   font-size: var(--dk-fs-title, 34rpx);
   line-height: 1.4;
   font-weight: 650;
-}
-.intro-desc {
-  display: block;
-  margin-top: 8rpx;
-  font-size: var(--dk-fs-meta, 24rpx);
-  line-height: 1.6;
-  color: var(--dk-muted, #6b736f);
 }
 
 .profile-card {
@@ -376,18 +365,12 @@ async function onSave() {
   font-weight: 600;
   color: var(--dk-ink, #1c2423);
 }
-.avatar-sub {
-  margin-top: 6rpx;
-  font-size: var(--dk-fs-meta, 24rpx);
-  color: var(--dk-muted, #6b736f);
-}
 .divider {
   height: 1rpx;
   margin: 36rpx 0 30rpx;
   background: var(--dk-line, #e2e6e4);
 }
 .mood-divider{margin-top:30rpx}
-.mood-tip{margin-top:-4rpx}
 .mood-options{display:flex;gap:10rpx;margin-top:22rpx;overflow-x:auto}.mood-option{display:flex;width:106rpx;height:94rpx;flex:0 0 106rpx;align-items:center;justify-content:center;gap:6rpx;border:1rpx solid var(--dk-line);border-radius:18rpx;color:var(--dk-muted);background:var(--dk-bg);font-size:19rpx;flex-direction:column;box-sizing:border-box}.mood-option.on{border-color:var(--dk-brand);color:var(--dk-brand);background:var(--dk-brand-soft);font-weight:700}.mood-icon{font-size:30rpx;line-height:1}
 .field-label {
   display: block;
@@ -395,6 +378,7 @@ async function onSave() {
   font-size: var(--dk-fs-body, 28rpx);
   font-weight: 600;
 }
+.optional{margin-left:8rpx;color:var(--dk-muted,#6b736f);font-size:20rpx;font-weight:400}
 .input-wrap {
   display: flex;
   align-items: center;
@@ -408,14 +392,6 @@ async function onSave() {
 .input-wrap:focus-within {
   border-color: var(--dk-brand, #247f76);
 }
-.field-tip {
-  display: block;
-  margin-top: 12rpx;
-  font-size: var(--dk-fs-meta, 24rpx);
-  line-height: 1.6;
-  color: var(--dk-muted, #6b736f);
-}
-
 .input {
   flex: 1;
   min-width: 0;

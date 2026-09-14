@@ -3,10 +3,10 @@
     <view class="intro">
       <text class="intro-kicker">官方体验圈</text>
       <text class="intro-title">管理中心</text>
-      <text class="intro-copy">{{ isOwner ? '维护公开内容，也可以安排成员协助管理。' : '处理举报，维护体验圈的公开内容与秩序。' }}</text>
+      <text class="intro-copy">维护公开内容与成员权限。</text>
     </view>
 
-    <view v-if="isOwner" class="management-tabs">
+    <view v-if="isManager" class="management-tabs">
       <view class="management-tab" :class="{ active: activeSection === 'content' }" @tap="activeSection = 'content'">
         <text>内容管理</text>
         <text v-if="reports.length" class="management-tab-count">{{ reports.length }}</text>
@@ -23,7 +23,7 @@
       </view>
     </view>
 
-    <view v-if="isOwner && activeSection === 'members'" class="member-admin-section">
+    <view v-if="isManager && activeSection === 'members'" class="member-admin-section">
       <view class="member-admin-heading">
         <view class="member-admin-heading-copy">
           <text class="member-admin-title">成员管理</text>
@@ -120,7 +120,7 @@ const loading = ref(true)
 const busy = ref(false)
 const activeSection = ref<'content' | 'members'>('content')
 const memberKeyword = ref('')
-const isOwner = computed(() => space.value?.currentUserRole === 'owner')
+const isManager = computed(() => space.value?.currentUserRole === 'owner' || space.value?.currentUserRole === 'admin')
 const adminCount = computed(() => members.value.filter((member) => member.role === 'owner' || member.role === 'admin').length)
 const sortedMembers = computed(() => [...members.value].sort((a, b) => {
   const roleRank = { owner: 0, admin: 1, member: 2 }
@@ -153,7 +153,7 @@ async function load() {
     const [pendingReports, blocked, allMembers] = await Promise.all([
       listPublicContentReports(spaceId.value),
       listPublicBlockedMembers(spaceId.value),
-      space.value.currentUserRole === 'owner' ? listOfficialSpaceMembers(spaceId.value) : Promise.resolve([]),
+      isManager.value ? listOfficialSpaceMembers(spaceId.value) : Promise.resolve([]),
     ])
     reports.value = pendingReports
     blockedMembers.value = blocked
@@ -166,7 +166,7 @@ async function load() {
 }
 
 async function toggleAdmin(member: SpaceMember) {
-  if (!isOwner.value || busy.value || member.role === 'owner') return
+  if (!isManager.value || busy.value || member.role === 'owner') return
   const makeAdmin = member.role !== 'admin'
   uni.showModal({
     title: makeAdmin ? `将 ${member.nickname} 设为管理员？` : `取消 ${member.nickname} 的管理员？`,

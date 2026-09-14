@@ -29,13 +29,13 @@
             <image class="hero-cover-subject" :src="space.coverUrl" mode="aspectFill" />
           </template>
           <view v-else class="hero-cover-fallback" />
-          <text v-if="isOwner" class="hero-cover-action">{{ coverUpdating ? '上传中…' : (space.coverUrl ? '更换封面' : '＋ 添加共同封面') }}</text>
+          <text v-if="canManageSpace" class="hero-cover-action">{{ coverUpdating ? '上传中…' : (space.coverUrl ? '更换封面' : '＋ 添加共同封面') }}</text>
         </view>
         <view class="hero-top">
           <view class="hero-copy">
             <view class="space-title-row">
               <text class="title">{{ space.name }}</text>
-              <view v-if="isOwner" class="rename-entry" role="button" aria-label="修改时光圈名称" @tap.stop="openNameEditor">
+              <view v-if="canManageSpace" class="rename-entry" role="button" aria-label="修改时光圈名称" @tap.stop="openNameEditor">
                 <image src="/static/actions/write.png" mode="aspectFit" />
               </view>
             </view>
@@ -138,11 +138,11 @@
         <view v-if="isOfficialModerator" class="management-entry" @tap="openOfficialModeration">
           <view class="management-entry-copy">
             <text class="management-entry-title">管理中心</text>
-            <text class="management-entry-desc">{{ isOwner ? '内容与成员管理' : '处理举报与管理公开内容' }}</text>
+            <text class="management-entry-desc">内容与成员管理</text>
           </view>
           <text class="management-entry-arrow">›</text>
         </view>
-        <button v-if="!isOwner" class="leave-official" @tap="leaveOfficialSpace">退出官方体验圈</button>
+        <button v-if="!isOfficialModerator" class="leave-official" @tap="leaveOfficialSpace">退出官方体验圈</button>
       </template>
       <button v-else class="dissolve-space" @tap="dissolveCurrentSpace">解除共同记录空间</button>
       </template>
@@ -206,6 +206,7 @@ const records = ref<Entry[]>([])
 const myUserId = computed(() => String(getCachedUserId() || ''))
 const isOwner = computed(() => String(space.value?.ownerId || '') === myUserId.value)
 const isOfficialModerator = computed(() => !!space.value?.isOfficial && (isOwner.value || space.value.currentUserRole === 'admin'))
+const canManageSpace = computed(() => isOwner.value || isOfficialModerator.value)
 const publicMemberOverflow = computed(() => {
   if (!space.value?.isOfficial) return 0
   const shown = Math.min(space.value.members?.length || 0, 3)
@@ -298,7 +299,7 @@ function moodLabel(mood: SpaceMood) {
 
 function onMemberTap(member: SpaceMember) {
   if (space.value?.isOfficial) {
-    if (isOwner.value && member.userId !== myUserId.value) manageOfficialMember(member)
+    if (isOfficialModerator.value && member.userId !== myUserId.value) manageOfficialMember(member)
     return
   }
   manageMember(member.userId, member.nickname)
@@ -326,7 +327,7 @@ function manageOfficialMember(member: SpaceMember) {
 }
 
 function openNameEditor() {
-  if (!isOwner.value || !space.value) return
+  if (!canManageSpace.value || !space.value) return
   spaceNameDraft.value = space.value.name
   nameEditorOpen.value = true
 }
@@ -403,7 +404,7 @@ function clearSpaceCover() {
 }
 
 function onCoverTap() {
-  if (!isOwner.value || coverUpdating.value) return
+  if (!canManageSpace.value || coverUpdating.value) return
   if (!space.value?.coverUrl) {
     chooseSpaceCover()
     return

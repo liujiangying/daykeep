@@ -790,8 +790,8 @@ entriesRouter.post('/:id/move-to-space', async (req, res) => {
       })
     }
 
-    const memberResult = await client.query<{ postPolicy: string; ownerId: string; accessType: string; postingBlockedAt: string | null }>(
-      `SELECT s.post_policy AS "postPolicy", s.owner_id::text AS "ownerId",
+    const memberResult = await client.query<{ role: string; postPolicy: string; ownerId: string; accessType: string; postingBlockedAt: string | null }>(
+      `SELECT m.role, s.post_policy AS "postPolicy", s.owner_id::text AS "ownerId",
               s.access_type AS "accessType", m.posting_blocked_at AS "postingBlockedAt"
          FROM t_space_member m
          JOIN t_space s ON s.id = m.space_id AND s.dissolved_at IS NULL
@@ -807,7 +807,7 @@ entriesRouter.post('/:id/move-to-space', async (req, res) => {
       await client.query('ROLLBACK')
       return res.status(403).json({ code: 403, msg: '你暂时不能在该公开空间发布内容' })
     }
-    if (targetSpace?.postPolicy === 'admin_only' && String(targetSpace.ownerId) !== String(req.userId)) {
+    if (targetSpace?.postPolicy === 'admin_only' && String(targetSpace.ownerId) !== String(req.userId) && targetSpace.role !== 'admin') {
       await client.query('ROLLBACK')
       return res.status(403).json({ code: 403, msg: '该空间仅管理员可以发布' })
     }
@@ -1098,7 +1098,7 @@ entriesRouter.post('/', async (req, res) => {
       if (member.accessType === 'public' && member.postingBlockedAt) {
         return res.status(403).json({ code: 403, msg: '你暂时不能在该公开空间发布内容' })
       }
-      if (member.postPolicy === 'admin_only' && String(member.ownerId) !== String(req.userId)) {
+      if (member.postPolicy === 'admin_only' && String(member.ownerId) !== String(req.userId) && member.role !== 'admin') {
         return res.status(403).json({ code: 403, msg: '该空间仅管理员可以发布' })
       }
     }

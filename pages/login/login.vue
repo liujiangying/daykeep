@@ -106,7 +106,7 @@ import {
   isDevLoginAvailable,
   isOfficeNetworkError,
   isSessionBoundaryError,
-  ensureRequiredProfile,
+  needsInitialProfileSetup,
 } from '@/services/auth'
 import { shouldShowOnboarding } from '@/services/onboarding'
 
@@ -144,7 +144,11 @@ const canPhoneLogin = computed(() => isPhoneValid.value && /^\d{6}$/.test(smsCod
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
 async function goHome() {
-  if (!await ensureRequiredProfile()) return
+  const shouldPromptProfile = await needsInitialProfileSetup()
+  const promptProfile = () => {
+    if (!shouldPromptProfile) return
+    setTimeout(() => uni.navigateTo({ url: '/subpackages/mine/edit?fromLogin=1' }), 150)
+  }
   let redirect = ''
   try {
     const pending = String(uni.getStorageSync(POST_LOGIN_REDIRECT_KEY) || '')
@@ -157,18 +161,20 @@ async function goHome() {
   if (redirect) {
     uni.reLaunch({
       url: redirect,
-      fail: () => uni.reLaunch({ url: HOME }),
+      success: promptProfile,
+      fail: () => uni.reLaunch({ url: HOME, success: promptProfile }),
     })
     return
   }
   if (shouldShowOnboarding()) {
-    uni.reLaunch({ url: '/pages/onboarding/index' })
+    uni.reLaunch({ url: '/pages/onboarding/index', success: promptProfile })
     return
   }
   uni.switchTab({
     url: HOME,
+    success: promptProfile,
     fail: () => {
-      uni.reLaunch({ url: HOME })
+      uni.reLaunch({ url: HOME, success: promptProfile })
     },
   })
 }

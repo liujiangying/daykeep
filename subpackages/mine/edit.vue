@@ -81,6 +81,7 @@
         :disabled="saving"
         @tap="onSave"
       >保存</button>
+      <text v-if="fromLogin" class="later" @tap="finishOnboarding">稍后再设置</text>
     </view>
   </view>
 </template>
@@ -192,8 +193,12 @@ async function chooseAvatar() {
 }
 
 function finishOnboarding() {
-  // 回到登录入口统一处理 onboarding 或邀请链接，避免资料设置后丢失原目标。
-  uni.reLaunch({ url: '/pages/login/login' })
+  uni.navigateBack({
+    fail: () => uni.switchTab({
+      url: '/pages/timeline/index',
+      fail: () => uni.reLaunch({ url: '/pages/timeline/index' }),
+    }),
+  })
 }
 
 async function onSave() {

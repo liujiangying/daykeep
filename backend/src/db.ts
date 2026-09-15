@@ -1063,9 +1063,11 @@ export async function ensureSchema(): Promise<void> {
       owner_type, space_id, visibility, entry_kind, images, client_request_id
     )
     SELECT official.id, 'diary', '欢迎来到只我们·体验圈',
-           '欢迎来到只我们·体验圈。先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。',
+           E'欢迎来到只我们·体验圈。\n先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。',
            current_date, now(), TRUE, FALSE,
-           'space', s.id, 'space', 'normal', '[]', 'official-experience-welcome-v1'
+           'space', s.id, 'space', 'normal',
+           '["cos://daykeep/system/official-experience/welcome-1.png","cos://daykeep/system/official-experience/welcome-2.png"]',
+           'official-experience-welcome-v1'
       FROM t_space s
       JOIN t_user official ON official.openid = 'system:daykeep-official'
      WHERE s.official_key = 'daykeep-experience'
@@ -1075,7 +1077,8 @@ export async function ensureSchema(): Promise<void> {
     -- 同步更新已有环境中的官方欢迎记录；稳定 seed 标识确保不会改到用户内容。
     UPDATE t_entry e
        SET title = '欢迎来到只我们·体验圈',
-           body = '欢迎来到只我们·体验圈。先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。',
+           body = E'欢迎来到只我们·体验圈。\n先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。',
+           images = '["cos://daykeep/system/official-experience/welcome-1.png","cos://daykeep/system/official-experience/welcome-2.png"]',
            updated_at = now()
       FROM t_space s, t_user official
      WHERE e.space_id = s.id
@@ -1085,22 +1088,43 @@ export async function ensureSchema(): Promise<void> {
        AND e.client_request_id = 'official-experience-welcome-v1'
        AND (
          e.title IS DISTINCT FROM '欢迎来到只我们·体验圈'
-         OR e.body IS DISTINCT FROM '欢迎来到只我们·体验圈。先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。'
+         OR e.body IS DISTINCT FROM E'欢迎来到只我们·体验圈。\n先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。'
+         OR e.images IS DISTINCT FROM '["cos://daykeep/system/official-experience/welcome-1.png","cos://daykeep/system/official-experience/welcome-2.png"]'
        );
 
     INSERT INTO t_entry (
       user_id, type, title, body, event_date, event_at, pinned, show_in_timeline,
       owner_type, space_id, visibility, entry_kind, images, client_request_id
     )
-    SELECT official.id, 'diary', '今天想记住的一件小事',
-           '不需要写得完整。一句话、一张照片，甚至只是此刻的心情，都可以成为以后想回来的地方。',
+    SELECT official.id, 'diary', '不需要写得完整。',
+           E'不需要写得完整。\n一句话、一张照片，甚至只是此刻的心情，都可以成为以后想回来的地方。',
            current_date - 1, now() - interval '1 day', FALSE, FALSE,
-           'space', s.id, 'space', 'normal', '[]', 'official-experience-memory-v1'
+           'space', s.id, 'space', 'normal',
+           '["cos://daykeep/system/official-experience/memory.png"]',
+           'official-experience-memory-v1'
       FROM t_space s
       JOIN t_user official ON official.openid = 'system:daykeep-official'
      WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
+
+    -- 同步已有官方示例的标题层级和配图；只匹配稳定 seed 标识。
+    UPDATE t_entry e
+       SET title = '不需要写得完整。',
+           body = E'不需要写得完整。\n一句话、一张照片，甚至只是此刻的心情，都可以成为以后想回来的地方。',
+           images = '["cos://daykeep/system/official-experience/memory.png"]',
+           updated_at = now()
+      FROM t_space s, t_user official
+     WHERE e.space_id = s.id
+       AND s.official_key = 'daykeep-experience'
+       AND official.openid = 'system:daykeep-official'
+       AND e.user_id = official.id
+       AND e.client_request_id = 'official-experience-memory-v1'
+       AND (
+         e.title IS DISTINCT FROM '不需要写得完整。'
+         OR e.body IS DISTINCT FROM E'不需要写得完整。\n一句话、一张照片，甚至只是此刻的心情，都可以成为以后想回来的地方。'
+         OR e.images IS DISTINCT FROM '["cos://daykeep/system/official-experience/memory.png"]'
+       );
 
     INSERT INTO t_entry (
       user_id, type, title, body, event_date, event_at, repeat_rule, show_in_timeline,

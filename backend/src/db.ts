@@ -1063,7 +1063,7 @@ export async function ensureSchema(): Promise<void> {
       owner_type, space_id, visibility, entry_kind, images, client_request_id
     )
     SELECT official.id, 'diary', '欢迎来到只我们·体验圈',
-           '这里是一个可以放心试用的公开空间。看看大家怎样记录当下、约定未来，再决定要不要建立属于自己的小圈子。',
+           '欢迎来到只我们·体验圈。先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。',
            current_date, now(), TRUE, FALSE,
            'space', s.id, 'space', 'normal', '[]', 'official-experience-welcome-v1'
       FROM t_space s
@@ -1071,6 +1071,22 @@ export async function ensureSchema(): Promise<void> {
      WHERE s.official_key = 'daykeep-experience'
     ON CONFLICT (user_id, client_request_id)
       WHERE client_request_id IS NOT NULL AND btrim(client_request_id) <> '' DO NOTHING;
+
+    -- 同步更新已有环境中的官方欢迎记录；稳定 seed 标识确保不会改到用户内容。
+    UPDATE t_entry e
+       SET title = '欢迎来到只我们·体验圈',
+           body = '欢迎来到只我们·体验圈。先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。',
+           updated_at = now()
+      FROM t_space s, t_user official
+     WHERE e.space_id = s.id
+       AND s.official_key = 'daykeep-experience'
+       AND official.openid = 'system:daykeep-official'
+       AND e.user_id = official.id
+       AND e.client_request_id = 'official-experience-welcome-v1'
+       AND (
+         e.title IS DISTINCT FROM '欢迎来到只我们·体验圈'
+         OR e.body IS DISTINCT FROM '欢迎来到只我们·体验圈。先看看大家如何记录此刻、约定未来，再决定要不要创建自己的小圈子。'
+       );
 
     INSERT INTO t_entry (
       user_id, type, title, body, event_date, event_at, pinned, show_in_timeline,

@@ -1,5 +1,6 @@
 import { Router, type NextFunction, type Request, type Response } from 'express'
 import crypto from 'node:crypto'
+import { normalizeSystemSeedEventDate } from '../lib/systemSeeds.js'
 import multer from 'multer'
 import { getPool, query, queryOne } from '../db.js'
 import { requireAuth } from '../auth.js'
@@ -1077,11 +1078,18 @@ entriesRouter.post('/', async (req, res) => {
     const titleCheck = sanitizeEntryTitle(titleRaw)
     if (!titleCheck.ok) return res.status(400).json({ code: 400, msg: titleCheck.msg })
     const title = titleCheck.title
-    const eventDate = String(b.eventDate || '').slice(0, 10)
+    let eventDate = String(b.eventDate || '').slice(0, 10)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) {
       return res.status(400).json({ code: 400, msg: 'eventDate required (YYYY-MM-DD)' })
     }
     const ownerType = normalizeOwnerType(b.ownerType)
+    const requestedClientRequestId = normalizeClientRequestId(b.clientRequestId)
+    eventDate = normalizeSystemSeedEventDate({
+      eventDate,
+      ownerType,
+      clientRequestId: requestedClientRequestId,
+      body,
+    })
     const spaceId = normalizeSpaceId(b.spaceId, ownerType)
     const visibility = normalizeVisibility(b.visibility, ownerType)
     if (ownerType === 'space') {
@@ -1169,7 +1177,7 @@ entriesRouter.post('/', async (req, res) => {
     const eventAt = isDiary
       ? normalizeEventAt(b.eventAt, eventDate) || `${eventDate} 00:00:00`
       : normalizeEventAt(b.eventAt, eventDate)
-    let clientRequestId = normalizeClientRequestId(b.clientRequestId)
+    let clientRequestId = requestedClientRequestId
     // 日记若未带客户端幂等键：用内容指纹兜底。图片上传前后的请求仍属于同一条日记，
     // 因此指纹不包含 images，避免同一内容被拆成“纯文字 + 带图”两条。
     if (!clientRequestId && isDiary) {

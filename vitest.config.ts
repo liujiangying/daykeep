@@ -16,6 +16,7 @@ export default defineConfig({
       'backend/src/lib/insightDates.test.ts',
       'backend/src/lib/phone.test.ts',
       'backend/src/lib/session.test.ts',
+      'backend/src/lib/systemSeeds.test.ts',
       'backend/src/cos.test.ts',
       'backend/src/routes/history.test.ts',
     ],

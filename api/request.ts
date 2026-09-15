@@ -146,7 +146,7 @@ async function rawRequest<T>(opts: ReqOpts): Promise<T> {
   if (status >= 400 || (body && body.code && body.code !== 0)) {
     const gatewayHint =
       status === 403
-        ? '网关拒绝访问(403)，请连办公网/VPN 后再试'
+        ? '服务拒绝访问(403)，请稍后重试'
         : status === 502 || status === 503
           ? `服务暂时不可用(${status})，请稍后重试`
           : ''

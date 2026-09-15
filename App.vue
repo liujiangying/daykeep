@@ -29,7 +29,7 @@ export default {
     // #endif
   },
   async onShow() {
-    // 本地 token 只代表"曾登录过"。回到前台先向后端探活；办公网网关
+    // 本地 token 只代表"曾登录过"。回到前台先向公网 API 探活；短暂网络
     // 明确拒绝时统一回登录页，普通断网则继续保留离线缓存。
     if (isLoggedIn() && await validateForegroundSession()) scheduleAllReminders()
 

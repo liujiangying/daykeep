@@ -531,7 +531,7 @@ authRouter.post('/wx-login', async (req, res) => {
 
     const provider = platform === 'app' ? 'wechat_app' : 'wechat_mp'
     const uid = await upsertWechatUser(provider, openid, unionid, nickname, avatar)
-    // 每次登录递增 token_version，使此前泄漏的 JWT（含扫描复用）全部失效
+    // 登录只签发新 token，不踢掉手机/开发者工具等其他已登录端。
     const tokens = await issueTokensAfterLogin(uid)
     return res.json({
       code: 0,

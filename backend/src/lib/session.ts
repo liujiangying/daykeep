@@ -31,9 +31,13 @@ export async function assertTokenVersion(userId: number, ver: number): Promise<v
   }
 }
 
-/** 登录成功：先作废旧会话，再签发带新 version 的一对 token */
+/**
+ * 登录成功：使用当前 version 签发 token，允许手机、开发者工具等多端同时登录。
+ * 只有用户主动退出时才通过 bumpTokenVersion 作废所有旧会话。
+ */
 export async function issueTokensAfterLogin(userId: number) {
-  const ver = await bumpTokenVersion(userId)
+  const ver = await readTokenVersion(userId)
+  if (ver == null) throw new Error('user not found')
   return {
     userId,
     accessToken: signAccess(userId, ver),

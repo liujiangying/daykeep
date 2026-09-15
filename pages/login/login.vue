@@ -92,7 +92,7 @@
  * 登录页：微信一键登录（主路径）
  * - 手机号登录待 SMS 配置就绪后打开 showPhoneLogin
  * - 已登录时 ensureSession 探活，有效直接进首页
- * - 非办公网 403 时提示连 VPN
+ * - 暂时网络/网关异常时保留已有会话
  */
 import { onMounted, ref, computed } from 'vue'
 import {
@@ -104,7 +104,7 @@ import {
   logout,
   devLogin,
   isDevLoginAvailable,
-  isOfficeNetworkError,
+  isTransientAccessError,
   isSessionBoundaryError,
   needsInitialProfileSetup,
 } from '@/services/auth'
@@ -181,7 +181,7 @@ async function goHome() {
   })
 }
 
-/** 本地有 token 不等于会话有效：需探活，非办公网 403 时不得放行。 */
+/** 本地有 token 不等于会话有效：需向公网 API 探活。 */
 async function ensureSession(): Promise<boolean> {
   if (!isLoggedIn()) return false
   try {
@@ -191,8 +191,8 @@ async function ensureSession(): Promise<boolean> {
     const msg = String(e?.message || '')
     if (isSessionBoundaryError(e)) {
       await logout()
-    } else if (isOfficeNetworkError(e)) {
-      uni.showToast({ title: '请连接办公网/VPN 后再登录', icon: 'none', duration: 2500 })
+    } else if (isTransientAccessError(e)) {
+      uni.showToast({ title: '暂时无法连接服务，请检查网络后重试', icon: 'none', duration: 2500 })
     } else {
       uni.showToast({ title: msg || '登录状态已失效', icon: 'none' })
     }
@@ -235,7 +235,7 @@ async function onWxLogin() {
   } catch (e: any) {
     const msg = String(e?.message || '微信登录失败')
     uni.showToast({
-      title: msg.includes('403') || msg.includes('网关') ? '请连接办公网/VPN 后再登录' : msg,
+      title: msg.includes('403') || msg.includes('网关') ? '服务暂时无法访问，请稍后重试' : msg,
       icon: 'none',
     })
   } finally {
@@ -271,7 +271,7 @@ async function onPhoneLogin() {
   } catch (e: any) {
     const msg = String(e?.message || '登录失败')
     uni.showToast({
-      title: msg.includes('403') || msg.includes('网关') ? '请连接办公网/VPN 后再登录' : msg,
+      title: msg.includes('403') || msg.includes('网关') ? '服务暂时无法访问，请稍后重试' : msg,
       icon: 'none',
     })
   } finally {

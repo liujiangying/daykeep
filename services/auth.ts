@@ -285,12 +285,17 @@ export function isSessionBoundaryError(error: unknown): boolean {
   return message.includes('未登录')
 }
 
-export function isOfficeNetworkError(error: unknown): boolean {
+export function isTransientAccessError(error: unknown): boolean {
   const message = String((error as { message?: string })?.message || error || '')
-  return message.includes('403') || message.includes('办公网') || message.includes('网关拒绝')
+  return (
+    message.includes('403')
+    || message.includes('网络')
+    || message.includes('网关拒绝')
+    || message.includes('服务暂时不可用')
+  )
 }
 
-/** 只有服务端明确判定未登录时才退出；403/网关故障不能清除有效会话。 */
+/** 只有服务端明确判定未登录时才退出；短暂网络/网关故障不能清除有效会话。 */
 export async function redirectToLoginForSessionError(error: unknown): Promise<boolean> {
   if (!isSessionBoundaryError(error)) return false
   if (redirectingToLogin) return true
@@ -324,7 +329,7 @@ export async function validateForegroundSession(): Promise<boolean> {
       return true
     } catch (error) {
       if (await redirectToLoginForSessionError(error)) return false
-      if (isOfficeNetworkError(error)) {
+      if (isTransientAccessError(error)) {
         uni.showToast({ title: '暂时无法验证登录状态，请检查网络', icon: 'none', duration: 2500 })
         return false
       }

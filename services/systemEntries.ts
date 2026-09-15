@@ -5,7 +5,7 @@
  * 内置日期：
  * 1. 微信发布 — 自 2011-01-21 起算
  * 2. 今年 — 自上年 12-31 锚点，展示「已经」= 今年第几天（实时）
- * 3. 给自己的小约定 — 未来 7 天
+ * 3. 给自己的小约定 — 2027-01-01（固定内置日期）
  *
  * 个人版不再向「仅自己」写入演示随手记；历史版本写入的两条演示会被安全清理。
  */
@@ -26,6 +26,8 @@ const DIARY_SEED_KEY_PREFIX_V2 = 'dk_diary_seeds_v2_'
 
 /** 微信正式发布日 */
 const WECHAT_RELEASE_DATE = '2011-01-21'
+/** 个人空间的内置新年约定；新老用户保持一致。 */
+const SELF_PROMISE_DATE = '2027-01-01'
 
 const OLD_ANN_TITLES = ['认识记日子的日子', '第一次打开记日子']
 
@@ -382,7 +384,8 @@ const ANN_SEEDS: AnnSeedDef[] = [
   {
     seed: 'self_promise',
     title: '给自己的小约定',
-    createDate: () => ymd(addDays(7)),
+    createDate: () => SELF_PROMISE_DATE,
+    syncDate: () => SELF_PROMISE_DATE,
   },
 ]
 
@@ -515,27 +518,27 @@ async function ensureSharedSeedsInner(existing: Entry[]): Promise<Entry[]> {
     }
   }
 
-  // 「今年」实时对齐锚点，并本地重算天数
-  const yearDef = ANN_SEEDS.find((x) => x.seed === 'year_progress')!
-  const yearEntry = findAnnSeed(list, yearDef)
-  if (yearEntry && yearDef.syncDate) {
-    const want = yearDef.syncDate()
-    if (yearEntry.eventDate !== want) {
+  // 「今年」每年对齐锚点；「给自己的小约定」统一迁移到固定日期。
+  for (const def of ANN_SEEDS.filter((item) => item.syncDate)) {
+    const entry = findAnnSeed(list, def)
+    if (!entry || !def.syncDate) continue
+    const want = def.syncDate()
+    if (entry.eventDate !== want) {
       try {
-        const updated = await updateEntry(yearEntry.id, {
+        const updated = await updateEntry(entry.id, {
           eventDate: want,
-          body: seedBody(yearDef.seed),
-          title: yearDef.title,
+          body: seedBody(def.seed),
+          title: def.title,
         })
         list = list.map((x) => (x.id === updated.id ? updated : x))
       } catch {
         list = list.map((x) =>
-          x.id === yearEntry.id ? withDays({ ...yearEntry, title: yearDef.title }, want) : x,
+          x.id === entry.id ? withDays({ ...entry, title: def.title }, want) : x,
         )
       }
     } else {
       list = list.map((x) =>
-        x.id === yearEntry.id ? withDays(yearEntry, yearEntry.eventDate) : x,
+        x.id === entry.id ? withDays(entry, entry.eventDate) : x,
       )
     }
   }

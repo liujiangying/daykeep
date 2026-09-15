@@ -166,7 +166,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
 import { onLoad, onShow, onHide } from '@dcloudio/uni-app'
-import { fetchMe, getCachedUserId, isLoggedIn, isOfficeNetworkError, isSessionBoundaryError, logout } from '@/services/auth'
+import { fetchMe, getCachedUserId, isLoggedIn, isSessionBoundaryError, isTransientAccessError, logout } from '@/services/auth'
 import { toggleTodoDone, type Entry } from '@/services/entries'
 import { useEntriesStore } from '@/stores/entries'
 import { holidaysForTimeline, syncHolidaySettings } from '@/services/holidays'
@@ -592,7 +592,7 @@ async function load() {
       uni.reLaunch({ url: '/pages/login/login' })
       return
     }
-    if (isOfficeNetworkError(e)) {
+    if (isTransientAccessError(e)) {
       loggedIn.value = isLoggedIn()
       uni.showToast({ title: '网络暂不可用，已保留登录状态', icon: 'none', duration: 2500 })
       return

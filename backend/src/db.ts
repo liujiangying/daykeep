@@ -1116,6 +1116,20 @@ export async function ensureSchema(): Promise<void> {
        AND (e.event_date <> DATE '2027-01-01'
          OR e.event_at <> TIMESTAMP '2027-01-01 10:00:00');
 
+    -- 个人空间的系统小约定也统一为 2027 年元旦。
+    -- 仅匹配稳定 seed 标识，不会改动用户自行创建的同名约定。
+    UPDATE t_entry
+       SET event_date = DATE '2027-01-01',
+           event_at = CASE
+             WHEN event_at IS NULL THEN NULL
+             ELSE DATE '2027-01-01' + event_at::time
+           END,
+           updated_at = now()
+     WHERE owner_type = 'personal'
+       AND (client_request_id = 'seed:self_promise'
+         OR body LIKE '%__dk_seed:self_promise__%')
+       AND event_date <> DATE '2027-01-01';
+
     INSERT INTO t_entry (
       user_id, type, title, body, event_date, event_at, show_in_timeline,
       remind_enabled, owner_type, space_id, visibility, entry_kind,

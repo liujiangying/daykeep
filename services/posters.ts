@@ -3,20 +3,29 @@ import { fetchUserPrefs, saveUserPrefs } from '@/services/prefs'
 
 const HOLIDAY_POSTERS_KEY = 'dk_holiday_posters_v1'
 
-/** 默认海报背景通过环境变量配置，不把部署地址写入源码。 */
+/**
+ * 默认海报优先使用显式配置的 COS 地址；个人版未配置公开 COS 时，
+ * 回退到随小程序打包的内置素材，避免私有桶或缺少环境变量导致详情页空白。
+ */
 const COS_PUBLIC_HOST =
   (import.meta.env.VITE_COS_PUBLIC_HOST as string | undefined)?.replace(/\/$/, '') || ''
 const COS_PREFIX =
   (import.meta.env.VITE_COS_PREFIX as string | undefined)?.replace(/^\/|\/$/g, '') || ''
-const assetUrl = (path: string) => COS_PUBLIC_HOST
-  ? `${COS_PUBLIC_HOST}/${COS_PREFIX ? `${COS_PREFIX}/` : ''}${path}`
-  : ''
+const LOCAL_DEFAULT_POSTERS = [
+  '/static/posters/default-mist.jpg',
+  '/static/posters/default-field.jpg',
+  '/static/posters/default-rain.jpg',
+  '/static/posters/default-paper.jpg',
+] as const
+const posterUrl = (name: string, localUrl: string) => COS_PUBLIC_HOST
+  ? `${COS_PUBLIC_HOST}/${COS_PREFIX ? `${COS_PREFIX}/` : ''}defaults/posters/${name}.jpg`
+  : localUrl
 
 export const DEFAULT_POSTERS = [
-  assetUrl('defaults/posters/mist.jpg'),
-  assetUrl('defaults/posters/field.jpg'),
-  assetUrl('defaults/posters/rain.jpg'),
-  assetUrl('defaults/posters/paper.jpg'),
+  posterUrl('mist', LOCAL_DEFAULT_POSTERS[0]),
+  posterUrl('field', LOCAL_DEFAULT_POSTERS[1]),
+  posterUrl('rain', LOCAL_DEFAULT_POSTERS[2]),
+  posterUrl('paper', LOCAL_DEFAULT_POSTERS[3]),
 ] as const
 
 function normalize(input: unknown): Record<string, string> {
@@ -36,7 +45,8 @@ export function resolvePosterUrl(url?: string): string {
   if (builtin) return DEFAULT_POSTERS[Number(builtin[1]) % DEFAULT_POSTERS.length]
   if (url.includes('/static/posters/default-')) {
     const name = url.match(/default-(mist|field|rain|paper)\.jpg/i)?.[1]?.toLowerCase()
-    if (name) return assetUrl(`defaults/posters/${name}.jpg`)
+    const index = ['mist', 'field', 'rain', 'paper'].indexOf(name || '')
+    if (name && index >= 0) return posterUrl(name, LOCAL_DEFAULT_POSTERS[index])
   }
   return url
 }

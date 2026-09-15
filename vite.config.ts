@@ -4,14 +4,14 @@ import path from 'path'
 import fs from 'fs'
 
 // uni-app does not copy assets referenced only by runtime-generated paths.
-// Tab icons must stay in-package; posters live on COS (see services/posters.ts).
+// Tab icons and the personal edition's built-in poster fallback must stay in-package.
 function copyRuntimeStatic(): any {
   function doCopy() {
     const platform = process.env.UNI_PLATFORM || 'mp-weixin'
     const mode = process.env.NODE_ENV === 'production' ? 'build' : 'dev'
     const mpRoot = path.resolve(__dirname, 'dist', mode, platform)
     if (!fs.existsSync(mpRoot)) return
-    for (const dir of ['tab', 'actions', 'mood', 'composer']) {
+    for (const dir of ['tab', 'actions', 'mood', 'composer', 'posters']) {
       const srcDir = path.resolve(__dirname, `static/${dir}`)
       const destDir = path.resolve(mpRoot, `static/${dir}`)
       if (!fs.existsSync(srcDir)) continue

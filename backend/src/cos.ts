@@ -7,6 +7,21 @@ let cosInternal: COS | null = null
 let cosPublic: COS | null = null
 
 const OBJECT_REF_PREFIX = 'cos://'
+const SIGNED_URL_CACHE_MAX = 2000
+
+type SignedUrlCacheEntry = {
+  url: string
+  expiresAt: number
+}
+
+/**
+ * COS 私有对象的签名参数包含签发时间。同一对象如果在每次接口请求时都重新签名，
+ * 小程序会认为 image.src 发生变化并重新解码图片，切换页面时就会明显闪烁。
+ *
+ * 缓存只保存已经下发给客户端的短期 URL，不改变 Bucket 权限，也不延长 URL 本身
+ * 的有效期；临近过期时会自动重新签发。
+ */
+const signedUrlCache = new Map<string, SignedUrlCacheEntry>()
 
 function hasCosSecrets(): boolean {
   return !!config.cos.secretId.trim() && !!config.cos.secretKey.trim()
@@ -126,7 +141,15 @@ export async function signedObjectUrl(reference: string): Promise<string> {
   if (!normalized) return reference
   requireCosConfigured()
   const key = normalized.slice(OBJECT_REF_PREFIX.length)
-  return await new Promise<string>((resolve, reject) => {
+  const expiresSeconds = Math.max(60, config.cos.urlExpire || 3600)
+  const cacheKey = `${config.cos.bucket}|${config.cos.region}|${normalized}`
+  const now = Date.now()
+  const refreshSafetyMs = Math.min(60_000, Math.max(5_000, expiresSeconds * 100))
+  const cached = signedUrlCache.get(cacheKey)
+  if (cached && cached.expiresAt - now > refreshSafetyMs) return cached.url
+  if (cached) signedUrlCache.delete(cacheKey)
+
+  const url = await new Promise<string>((resolve, reject) => {
     getCosPublic().getObjectUrl(
       {
         Bucket: config.cos.bucket,
@@ -134,7 +157,7 @@ export async function signedObjectUrl(reference: string): Promise<string> {
         Key: key,
         Sign: true,
         Method: 'GET',
-        Expires: Math.max(60, config.cos.urlExpire || 3600),
+        Expires: expiresSeconds,
         Protocol: 'https:',
       },
       (error, data) => {
@@ -143,6 +166,12 @@ export async function signedObjectUrl(reference: string): Promise<string> {
       },
     )
   })
+  signedUrlCache.set(cacheKey, { url, expiresAt: Date.now() + expiresSeconds * 1000 })
+  if (signedUrlCache.size > SIGNED_URL_CACHE_MAX) {
+    const oldestKey = signedUrlCache.keys().next().value
+    if (oldestKey) signedUrlCache.delete(oldestKey)
+  }
+  return url
 }
 
 /** 递归刷新 API 响应中的对象引用；同一响应内相同对象只签名一次。 */

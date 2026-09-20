@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   normalizeStoredAsset,
   normalizeUserAsset,
@@ -28,6 +28,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.restoreAllMocks()
   for (const key of ENV_KEYS) {
     const value = originalEnv[key]
     if (value === undefined) delete process.env[key]
@@ -86,5 +87,17 @@ describe('private COS references', () => {
     expect(payload.image).toContain('q-signature=')
     expect(payload.nested[0]).toBe(payload.image)
     expect(payload.createdAt).toBe(createdAt)
+  })
+
+  it('keeps the signed URL stable across API responses until it nears expiry', async () => {
+    const now = new Date('2026-09-20T08:00:00.000Z').getTime()
+    const dateNow = vi.spyOn(Date, 'now').mockReturnValue(now)
+    const reference = 'cos://daykeep/u1/entry/stable-between-pages.jpg'
+
+    const first = await resolveObjectReferences({ image: reference }) as { image: string }
+    dateNow.mockReturnValue(now + 30_000)
+    const second = await resolveObjectReferences({ image: reference }) as { image: string }
+
+    expect(second.image).toBe(first.image)
   })
 })

@@ -47,9 +47,43 @@ function uploadLocalFile(filePath: string, url: string): Promise<string> {
           reject(e)
         }
       },
-      fail: reject,
+      fail: (error) => {
+        const message = (error as { errMsg?: string })?.errMsg || '图片上传失败，请稍后重试'
+        reject(new Error(friendlyUploadError(0, message)))
+      },
     })
   })
+}
+
+function readLocalFileAsBase64(filePath: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fs = uni.getFileSystemManager()
+    fs.readFile({
+      filePath,
+      encoding: 'base64',
+      success: (result) => {
+        if (typeof result.data !== 'string' || !result.data) {
+          reject(new Error('无法读取图片内容，请重新选择图片'))
+          return
+        }
+        resolve(result.data)
+      },
+      fail: (error) => {
+        reject(new Error((error as { errMsg?: string })?.errMsg || '无法读取图片内容，请重新选择图片'))
+      },
+    })
+  })
+}
+
+async function uploadBase64Image(filePath: string, url: string): Promise<string> {
+  const image = await readLocalFileAsBase64(filePath)
+  const data = await request<{ url: string }>({
+    url,
+    method: 'POST',
+    data: { image },
+  })
+  if (!data?.url) throw new Error('upload failed')
+  return data.url
 }
 
 function getLocalFileSize(filePath: string): Promise<number> {
@@ -146,7 +180,15 @@ export async function uploadSpaceCover(image: string): Promise<string> {
   if (isRemoteUrl(image)) return image
   if (!image.startsWith('data:')) {
     const uploadPath = await prepareEntryImage(image)
-    return uploadLocalFile(uploadPath, '/api/upload/space-cover')
+    try {
+      return await uploadLocalFile(uploadPath, '/api/upload/space-cover')
+    } catch (error) {
+      // 部分已发布/体验版会在微信后台 uploadFile 域名配置刷新前拦截上传，
+      // 请求不会到达 API。共同封面改走已配置的 request 通道兜底，仍复用
+      // 同一个后端接口、鉴权和图片安全校验，不降低存储安全性。
+      console.warn('[upload/space-cover] uploadFile failed, retrying with request:', error)
+      return uploadBase64Image(uploadPath, '/api/upload/space-cover')
+    }
   }
   const data = await request<{ url: string }>({
     url: '/api/upload/space-cover',

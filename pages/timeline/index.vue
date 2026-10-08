@@ -28,13 +28,17 @@
         </view>
         <view class="composer-secondary-actions">
           <view class="composer-secondary-action" hover-class="dk-press" :hover-stay-time="60" @tap="createCommitment">
-            <text class="secondary-title">创建约定</text>
-            <text class="secondary-desc">约好一件未来的事</text>
+            <view class="secondary-copy">
+              <text class="secondary-title">创建约定</text>
+              <text class="secondary-desc">约好一件未来的事</text>
+            </view>
             <text class="secondary-arrow">›</text>
           </view>
           <view class="composer-secondary-action" hover-class="dk-press" :hover-stay-time="60" @tap="createCapsule">
-            <text class="secondary-title">时间胶囊</text>
-            <text class="secondary-desc">把此刻寄给以后</text>
+            <view class="secondary-copy">
+              <text class="secondary-title">时间胶囊</text>
+              <text class="secondary-desc">把此刻寄给以后</text>
+            </view>
             <text class="secondary-arrow">›</text>
           </view>
         </view>
@@ -1270,7 +1274,7 @@ onBackPress(() => {
   width: 42rpx;
   height: 42rpx;
 }
-.composer-secondary-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12rpx;margin-top:12rpx}.composer-secondary-action{display:flex;min-width:0;height:64rpx;align-items:center;gap:8rpx;padding:0 18rpx;border:1rpx solid var(--dk-line);border-radius:var(--dk-radius-lg,24rpx);background:transparent;box-sizing:border-box}.secondary-title{flex-shrink:0;color:var(--dk-ink);font-size:var(--dk-fs-meta,24rpx);font-weight:680}.secondary-desc{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dk-muted);font-size:var(--dk-fs-caption,22rpx)}.secondary-arrow{flex-shrink:0;color:var(--dk-brand);font-size:26rpx;line-height:1}
+.composer-secondary-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14rpx;margin-top:14rpx}.composer-secondary-action{display:flex;min-width:0;height:88rpx;align-items:center;gap:10rpx;padding:0 18rpx;border:1rpx solid rgba(47,111,106,.08);border-radius:20rpx;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(47,111,106,.05));box-sizing:border-box;box-shadow:inset 0 1rpx 0 rgba(255,255,255,.7)}.secondary-copy{min-width:0;flex:1}.secondary-title,.secondary-desc{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.secondary-title{color:var(--dk-ink);font-size:var(--dk-fs-meta,25rpx);font-weight:680}.secondary-desc{margin-top:5rpx;color:var(--dk-muted);font-size:var(--dk-fs-caption,23rpx)}.secondary-arrow{flex-shrink:0;color:var(--dk-brand);font-size:27rpx;line-height:1}
 .composer-inspiration{display:flex;align-items:center;gap:18rpx;margin-top:24rpx;padding-top:22rpx;border-top:1rpx solid rgba(47,111,106,.1)}
 .inspiration-copy{flex:1;min-width:0}.inspiration-label{display:block;color:var(--dk-feature-brand,#2f6f6a);font-size:var(--dk-fs-caption,23rpx);font-weight:750}.inspiration-question{display:-webkit-box;margin-top:7rpx;overflow:hidden;color:var(--dk-ink);font-size:var(--dk-fs-meta,25rpx);font-weight:680;line-height:1.42;-webkit-box-orient:vertical;-webkit-line-clamp:2}.inspiration-action{flex:0 0 auto;color:var(--dk-feature-brand,#2f6f6a);font-size:var(--dk-fs-caption,23rpx);font-weight:750;white-space:nowrap}
 .daily-reveal{margin-top:14rpx;padding:22rpx 26rpx;border:1rpx solid var(--dk-line);border-radius:var(--dk-radius-lg,24rpx);background:var(--dk-surface)}.daily-reveal-label{display:block;color:var(--dk-brand);font-size:21rpx;font-weight:700}.daily-reveal-question{display:block;margin:7rpx 0 12rpx;color:var(--dk-ink);font-size:25rpx;font-weight:650}.daily-reveal-row{display:grid;grid-template-columns:120rpx 1fr;gap:14rpx;padding:8rpx 0;color:var(--dk-muted);font-size:22rpx}.daily-reveal-row text:last-child{color:var(--dk-ink)}

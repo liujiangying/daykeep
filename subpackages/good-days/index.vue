@@ -665,7 +665,7 @@ onUnmounted(stopClock)
   position: relative;
   width: 100rpx;
   height: 132rpx;
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   background: linear-gradient(180deg, #3a3a3c 0%, #1c1c1e 48%, #2c2c2e 52%, #141416 100%);
   box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.18);
   display: flex;
@@ -721,7 +721,7 @@ onUnmounted(stopClock)
 
 .ps {
   font-size: var(--dk-fs-label, 26rpx);
-  color: #a3aaa7;
+  color: var(--dk-muted, #a3aaa7);
   letter-spacing: 0.04em;
   &.on {
     color: var(--dk-ink, #1c2423);
@@ -745,7 +745,7 @@ onUnmounted(stopClock)
 
 .st {
   font-size: var(--dk-fs-meta, 24rpx);
-  color: #b0b6b3;
+  color: var(--dk-muted, #b0b6b3);
   letter-spacing: 0.04em;
   &.on {
     color: var(--dk-brand, #2f6f6a);
@@ -792,7 +792,7 @@ onUnmounted(stopClock)
   font-size: var(--dk-fs-body, 28rpx);
   color: #fff;
   background: var(--dk-brand, #2f6f6a);
-  border-radius: 12rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   border: none;
   &::after {
     border: none;
@@ -850,7 +850,7 @@ onUnmounted(stopClock)
   line-height: 1.2;
   letter-spacing: 0.04em;
   &.is-overdue {
-    color: #b42318;
+    color: var(--dk-danger, #b42318);
   }
   &.is-today {
     color: var(--dk-brand, #2f6f6a);

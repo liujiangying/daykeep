@@ -32,3 +32,37 @@ $dk-fs-hero: 68rpx;
 
 // 页面内推荐：background: var(--dk-bg); color: var(--dk-ink);
 // 字号推荐：font-size: var(--dk-fs-title);
+
+/* ─────────────────────────────────────────────────────────
+ * 统一令牌（CSS 变量 + SCSS 别名）
+ * 静态令牌（圆角/间距/动效）定义在 App.vue 的 page{}；
+ * 主题相关令牌（危险色/纪念金/骨架色/阴影）由 services/theme.ts
+ * 的 themeCssVars() 注入页面根节点 :style。
+ * SCSS 别名带降级值，仅作便捷引用；样式内优先直接写 var(--dk-*)。
+ * ───────────────────────────────────────────────────────── */
+
+/* 圆角阶梯：sm 标签/输入 · md 按钮/行 · lg 卡片 · xl 大卡/弹层 · pill 胶囊 */
+$dk-radius-sm: var(--dk-radius-sm, 12rpx);
+$dk-radius-md: var(--dk-radius-md, 18rpx);
+$dk-radius-lg: var(--dk-radius-lg, 24rpx);
+$dk-radius-xl: var(--dk-radius-xl, 32rpx);
+$dk-radius-pill: var(--dk-radius-pill, 999rpx);
+
+/* 4rpx 基网格间距：1 元素内微间距 → 6 分区间大留白 */
+$dk-space-1: var(--dk-space-1, 8rpx);
+$dk-space-2: var(--dk-space-2, 16rpx);
+$dk-space-3: var(--dk-space-3, 24rpx);
+$dk-space-4: var(--dk-space-4, 32rpx);
+$dk-space-5: var(--dk-space-5, 48rpx);
+$dk-space-6: var(--dk-space-6, 64rpx);
+
+/* 动效节奏：fast 即时反馈（按压）· base 过渡（入场/面板） */
+$dk-motion-fast: var(--dk-motion-fast, 140ms);
+$dk-motion-base: var(--dk-motion-base, 240ms);
+$dk-ease-out: var(--dk-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+
+/* 主题相关功能色（降级值 = teal 主题） */
+$dk-danger: var(--dk-danger, #b64d46);
+$dk-danger-soft: var(--dk-danger-soft, #faf0ef);
+$dk-gold: var(--dk-gold, #b98519);
+$dk-gold-soft: var(--dk-gold-soft, #f4e7c4);

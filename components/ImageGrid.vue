@@ -1,10 +1,10 @@
 <template>
   <view class="img-grid">
     <view v-for="(img, i) in images" :key="i" class="img-item">
-      <image class="img" :src="img" mode="aspectFill" @tap="preview(i)" />
-      <text v-if="removable !== false" class="img-del" @tap.stop="remove(i)">×</text>
+      <image class="img" :src="img" mode="aspectFill" lazy-load @tap="preview(i)" />
+      <text v-if="removable !== false" class="img-del" hover-class="dk-press" :hover-stay-time="60" @tap.stop="remove(i)">×</text>
     </view>
-    <view v-if="showAdd !== false && images.length < max" class="img-add" @tap="add">
+    <view v-if="showAdd !== false && images.length < max" class="img-add" hover-class="dk-press" :hover-stay-time="60" @tap="add">
       <text class="img-add-t">+</text>
       <text class="img-add-s">添加照片</text>
     </view>
@@ -64,7 +64,7 @@ function add() {
   position: relative;
   width: 200rpx;
   height: 200rpx;
-  border-radius: 12rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   overflow: hidden;
   background: var(--dk-brand-soft);
 }
@@ -76,19 +76,26 @@ function add() {
   position: absolute;
   top: 6rpx;
   right: 8rpx;
+  display: flex;
   width: 40rpx;
   height: 40rpx;
-  line-height: 36rpx;
-  text-align: center;
+  align-items: center;
+  justify-content: center;
   font-size: 28rpx;
   color: #fff;
   background: rgba(0, 0, 0, 0.45);
   border-radius: 50%;
 }
+/* 隐形放大触控区，视觉不变 */
+.img-del::before {
+  content: '';
+  position: absolute;
+  inset: -14rpx;
+}
 .img-add {
   width: 200rpx;
   height: 200rpx;
-  border-radius: 12rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   border: 1rpx dashed var(--dk-line);
   display: flex;
   flex-direction: column;
@@ -96,15 +103,16 @@ function add() {
   justify-content: center;
   gap: 6rpx;
   background: var(--dk-surface);
+  transition: transform var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out), opacity var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out);
 }
 .img-add-t {
   font-size: 48rpx;
-  color: #b0b6b3;
+  color: var(--dk-muted, #b0b6b3);
   line-height: 1;
   font-weight: 300;
 }
 .img-add-s {
   font-size: 20rpx;
-  color: #b0b6b3;
+  color: var(--dk-muted, #b0b6b3);
 }
 </style>

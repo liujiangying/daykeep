@@ -1,8 +1,8 @@
 <template>
   <view class="page" :style="pageStyle">
     <template v-if="day">
-      <view class="poster">
-        <image class="poster-bg" :src="background" mode="aspectFill" />
+      <view class="poster dk-fade-up">
+        <DkImg class="poster-bg" :src="background" />
         <view class="poster-shade" />
         <view class="poster-copy">
           <text class="poster-title">{{ day.title }}</text>
@@ -14,7 +14,7 @@
         </view>
       </view>
 
-      <view v-if="!isHoliday && isSpaceDay" class="collab-card space-day-card" @tap="goCollaborate">
+      <view v-if="!isHoliday && isSpaceDay" class="collab-card space-day-card" hover-class="dk-press" :hover-stay-time="60" @tap="goCollaborate">
         <view class="collab-left">
           <view class="collab-avatars">
             <view v-for="member in spaceMembersPreview" :key="member.userId" class="collab-avatar space-member">
@@ -32,7 +32,7 @@
         <text class="collab-arrow">›</text>
       </view>
 
-      <view v-else-if="!isHoliday && isLegacyCollaborative" class="collab-card legacy-card" @tap="goCollaborate">
+      <view v-else-if="!isHoliday && isLegacyCollaborative" class="collab-card legacy-card" hover-class="dk-press" :hover-stay-time="60" @tap="goCollaborate">
         <view class="collab-left">
           <view class="collab-avatars">
             <view v-if="collabInfo" class="collab-avatar owner">
@@ -56,7 +56,7 @@
         <text class="collab-arrow">›</text>
       </view>
 
-      <view v-else-if="!isHoliday && !isBuiltInDay" class="collab-card transfer-card" @tap="chooseTargetSpace">
+      <view v-else-if="!isHoliday && !isBuiltInDay" class="collab-card transfer-card" hover-class="dk-press" :hover-stay-time="60" @tap="chooseTargetSpace">
         <view class="collab-left">
           <view class="collab-avatars">
             <view class="collab-avatar owner"><image v-if="userAvatar" :src="userAvatar" mode="aspectFill" /><text v-else>我</text></view>
@@ -71,19 +71,19 @@
       </view>
 
       <view class="actions">
-        <button class="action" hover-class="action-hover" @tap.stop="recordMood">
+        <button class="action" hover-class="dk-press" :hover-stay-time="60" @tap.stop="recordMood">
           <view class="action-icon"><image src="../../static/actions/record.png" mode="aspectFit" /></view>
           <text>写随手记</text>
         </button>
-        <button class="action" hover-class="action-hover" :loading="savingPoster" @tap="savePoster">
+        <button class="action" hover-class="dk-press" :hover-stay-time="60" :loading="savingPoster" @tap="savePoster">
           <view class="action-icon"><image src="../../static/actions/save.png" mode="aspectFit" /></view>
           <text>保存图片</text>
         </button>
-        <button class="action" hover-class="action-hover" @tap="handleShare">
+        <button class="action" hover-class="dk-press" :hover-stay-time="60" @tap="handleShare">
           <view class="action-icon"><image src="../../static/actions/share.png" mode="aspectFit" /></view>
           <text>分享</text>
         </button>
-        <button v-if="isHoliday || canEditDay" class="action" hover-class="action-hover" @tap="editDay">
+        <button v-if="isHoliday || canEditDay" class="action" hover-class="dk-press" :hover-stay-time="60" @tap="editDay">
           <view class="action-icon"><image src="../../static/actions/edit.png" mode="aspectFit" /></view>
           <text>编辑</text>
         </button>
@@ -93,12 +93,14 @@
 
       <canvas canvas-id="dayPosterCanvas" class="export-canvas" />
 
-      <view v-if="showShareSheet" class="share-sheet-mask" @tap="showShareSheet = false">
-        <view class="share-sheet" @tap.stop>
+      <view v-if="showShareSheet" class="share-sheet-mask dk-mask-in" @tap="showShareSheet = false">
+        <view class="share-sheet dk-sheet-up" @tap.stop>
           <view class="share-sheet-group">
             <!-- #ifdef MP-WEIXIN -->
             <button
               class="share-sheet-action"
+              hover-class="dk-press"
+              :hover-stay-time="60"
               open-type="share"
               @tap="shareDayCard"
             >
@@ -108,24 +110,26 @@
             <!-- #ifndef MP-WEIXIN -->
             <button
               class="share-sheet-action"
+              hover-class="dk-press"
+              :hover-stay-time="60"
               @tap="shareToSystem"
             >
               分享日子卡片
             </button>
             <!-- #endif -->
           </view>
-          <button class="share-sheet-cancel" @tap="showShareSheet = false">取消</button>
+          <button class="share-sheet-cancel" hover-class="dk-press" :hover-stay-time="60" @tap="showShareSheet = false">取消</button>
         </view>
       </view>
 
-      <view v-if="showEditor && (isHoliday || canEditDay)" class="sheet-mask" @tap="showEditor = false">
-        <view class="sheet" @tap.stop>
+      <view v-if="showEditor && (isHoliday || canEditDay)" class="sheet-mask dk-mask-in" @tap="showEditor = false">
+        <view class="sheet dk-sheet-up" @tap.stop>
           <view class="sheet-head">
             <view>
               <text class="sheet-title">{{ isHoliday ? '更换节日背景' : '换个背景' }}</text>
               <text class="sheet-subtitle">{{ isHoliday ? '节日日期由历法自动计算，仅支持更换背景' : '选择模板，或上传一张自己的照片' }}</text>
             </view>
-            <text class="sheet-close" @tap="showEditor = false">关闭</text>
+            <view class="sheet-close dk-hit" hover-class="dk-press" :hover-stay-time="60" @tap="showEditor = false">关闭</view>
           </view>
           <view class="editor-preview">
             <image :src="previewBackground" mode="aspectFill" />
@@ -140,6 +144,8 @@
                 :key="poster"
                 class="preset-card"
                 :class="{ selected: draftPresetIndex === index }"
+                hover-class="dk-press"
+                :hover-stay-time="60"
                 @tap="selectPreset(index)"
               >
                 <image :src="poster" mode="aspectFill" />
@@ -147,10 +153,10 @@
               </view>
             </view>
           </scroll-view>
-          <button class="upload-button" @tap="chooseCustomBackground">从相册选择或拍照</button>
-          <button class="confirm-button" :disabled="!hasBackgroundDraft" @tap="confirmBackground">应用此背景</button>
-          <button v-if="!isHoliday" class="more-edit-button" @tap="openFullEditor">编辑日期与提醒</button>
-          <button v-if="!isHoliday" class="quick-delete-button danger-action" @tap="removeDay">删除这个日子</button>
+          <button class="upload-button" hover-class="dk-press" :hover-stay-time="60" @tap="chooseCustomBackground">从相册选择或拍照</button>
+          <button class="confirm-button" hover-class="dk-press" :hover-stay-time="60" :disabled="!hasBackgroundDraft" @tap="confirmBackground">应用此背景</button>
+          <button v-if="!isHoliday" class="more-edit-button" hover-class="dk-press" :hover-stay-time="60" @tap="openFullEditor">编辑日期与提醒</button>
+          <button v-if="!isHoliday" class="quick-delete-button danger-action" hover-class="dk-press" :hover-stay-time="60" @tap="removeDay">删除这个日子</button>
           <text class="sheet-hint">{{ isHoliday ? '背景随时可以更换，节日名称和日期由系统计算。' : '背景会用于日子海报，之后也能随时更换。' }}</text>
         </view>
       </view>
@@ -165,6 +171,7 @@
 import { computed, nextTick, ref } from 'vue'
 import { onLoad, onShareAppMessage, onShow, onUnload } from '@dcloudio/uni-app'
 import { useThemePage } from '@/composables/useThemePage'
+import DkImg from '@/components/DkImg.vue'
 import { useEntriesStore } from '@/stores/entries'
 import {
   compressBackgroundImage,
@@ -757,12 +764,10 @@ onShareAppMessage(() => ({
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 254, 251, 0.08) 42%),
     var(--dk-surface, #fffefb);
   border: 1rpx solid rgba(255, 255, 255, 0.72);
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   padding: 24rpx 28rpx;
   margin: 20rpx 0;
-  box-shadow:
-    0 16rpx 36rpx rgba(47, 111, 106, 0.07),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07));
 }
 .collab-left {
   display: flex;
@@ -788,10 +793,10 @@ onShareAppMessage(() => ({
   color: var(--dk-feature-brand, #2f6f6a);
   &.owner { background: var(--dk-feature-brand-soft, #e4f0ee); }
   &.partner { background: var(--dk-feature-brand-soft, #e4f0ee); margin-left: -12rpx; }
-  &.add { background: #f0f0f0; border: 2rpx dashed #ccc; color: #999; margin-left: -12rpx; font-size: 28rpx; }
+  &.add { background: var(--dk-bg-soft, #f0f0f0); border: 2rpx dashed var(--dk-line, #ccc); color: var(--dk-muted, #999); margin-left: -12rpx; font-size: 28rpx; }
   &.space-member { margin-left: -12rpx; border: 3rpx solid var(--dk-surface, #fff); background: var(--dk-feature-brand-soft, #e4f0ee); color: var(--dk-feature-brand, #2f6f6a); }
   &.space-member:first-child { margin-left: 0; }
-  &.overflow { margin-left: -12rpx; border: 3rpx solid var(--dk-surface, #fff); background: #eef2f0; color: var(--dk-muted, #6b736f); font-size: 19rpx; }
+  &.overflow { margin-left: -12rpx; border: 3rpx solid var(--dk-surface, #fff); background: var(--dk-bg-soft, #eef2f0); color: var(--dk-muted, #6b736f); font-size: 19rpx; }
   image { width: 100%; height: 100%; }
 }
 .collab-text {
@@ -803,13 +808,13 @@ onShareAppMessage(() => ({
 .collab-kicker { color: var(--dk-brand, #2f6f6a); font-size: 20rpx; font-weight: 700; }
 .collab-title {
   font-size: 26rpx;
-  color: #333;
+  color: var(--dk-ink, #1c2423);
   font-weight: 500;
 }
 .collab-sub {
   overflow: hidden;
   font-size: 22rpx;
-  color: #999;
+  color: var(--dk-muted, #6b736f);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -817,10 +822,10 @@ onShareAppMessage(() => ({
   flex-shrink: 0;
   margin-left: 12rpx;
   font-size: 32rpx;
-  color: #ccc;
+  color: var(--dk-line-strong, #ccc);
 }
 .space-day-card { border: 1rpx solid rgba(47, 111, 106, .15); background: linear-gradient(135deg, var(--dk-surface, #fff), var(--dk-brand-soft, #e7f1ee)); }
-.legacy-card { background: #faf9f6; }
+.legacy-card { background: var(--dk-surface, #faf9f6); }
 .legacy-card .collab-kicker { color: #8b7660; }
 .transfer-card { border: 1rpx dashed rgba(47, 111, 106, .28); box-shadow: none; }
 .state {
@@ -835,7 +840,7 @@ onShareAppMessage(() => ({
   position: relative;
   height: 920rpx;
   overflow: hidden;
-  border-radius: 28rpx;
+  border-radius: var(--dk-radius-xl, 32rpx);
   background: #17312f;
   box-shadow: 0 18rpx 52rpx rgba(20, 33, 31, 0.16);
 }
@@ -914,18 +919,13 @@ onShareAppMessage(() => ({
   font-weight: 400;
   line-height: 1.3;
   border: 2rpx solid rgba(47, 111, 106, 0.24);
-  border-radius: 999rpx;
+  border-radius: var(--dk-radius-pill, 999rpx);
   background: rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(4rpx);
-  transition: transform 160ms ease, background 160ms ease;
 }
 .action::after {
   border: 0;
-}
-.action-hover {
-  background: rgba(255, 255, 255, 0.22);
-  transform: translateY(-2rpx) scale(0.97);
 }
 .action-icon {
   display: flex;
@@ -1040,7 +1040,7 @@ onShareAppMessage(() => ({
   position: relative;
   height: 164rpx;
   overflow: hidden;
-  border-radius: 20rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   background: #dfe6e3;
 }
 .editor-preview image,
@@ -1087,7 +1087,7 @@ onShareAppMessage(() => ({
   width: 178rpx;
   height: 220rpx;
   border: 2rpx solid transparent;
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   background: #e8ecea;
 }
 .preset-card.selected image {
@@ -1107,7 +1107,7 @@ onShareAppMessage(() => ({
 }
 .upload-button {
   margin-top: 28rpx;
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   color: #fff;
   background: var(--dk-brand, #2f7f78);
   font-size: 27rpx;
@@ -1117,7 +1117,7 @@ onShareAppMessage(() => ({
 }
 .confirm-button {
   margin-top: 16rpx;
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   color: var(--dk-brand, #2f7f78);
   background: var(--dk-brand-soft, #e4f0ee);
   font-size: 27rpx;
@@ -1131,7 +1131,7 @@ onShareAppMessage(() => ({
 }
 .more-edit-button {
   margin-top: 16rpx;
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   color: var(--dk-ink, #1c2423);
   background: var(--dk-bg-soft, #eef2f1);
   font-size: 26rpx;

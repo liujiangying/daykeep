@@ -297,10 +297,10 @@ async function onSave() {
 
 .profile-card {
   padding: 40rpx 32rpx 34rpx;
-  background: var(--dk-card, #fffefb);
+  background: var(--dk-surface, #fffefb);
   border: 1rpx solid var(--dk-line, #e2e6e4);
-  border-radius: 28rpx;
-  box-shadow: 0 10rpx 30rpx rgba(35, 53, 50, 0.045);
+  border-radius: var(--dk-radius-lg, 24rpx);
+  box-shadow: var(--dk-shadow-soft, 0 10rpx 30rpx rgba(35,53,50,.045));
 }
 .avatar-area {
   display: flex;
@@ -327,8 +327,8 @@ async function onSave() {
   width: 152rpx;
   height: 152rpx;
   border-radius: 50%;
-  border: 6rpx solid var(--dk-card, #fffefb);
-  box-shadow: 0 8rpx 24rpx rgba(35, 53, 50, 0.1);
+  border: 6rpx solid var(--dk-surface, #fffefb);
+  box-shadow: var(--dk-shadow-soft, 0 8rpx 24rpx rgba(35,53,50,.1));
   box-sizing: border-box;
 }
 .avatar-ph {
@@ -349,7 +349,7 @@ async function onSave() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 5rpx solid var(--dk-card, #fffefb);
+  border: 5rpx solid var(--dk-surface, #fffefb);
   border-radius: 50%;
   box-sizing: border-box;
 }
@@ -371,7 +371,7 @@ async function onSave() {
   background: var(--dk-line, #e2e6e4);
 }
 .mood-divider{margin-top:30rpx}
-.mood-options{display:flex;gap:10rpx;margin-top:22rpx;overflow-x:auto}.mood-option{display:flex;width:106rpx;height:94rpx;flex:0 0 106rpx;align-items:center;justify-content:center;gap:6rpx;border:1rpx solid var(--dk-line);border-radius:18rpx;color:var(--dk-muted);background:var(--dk-bg);font-size:19rpx;flex-direction:column;box-sizing:border-box}.mood-option.on{border-color:var(--dk-brand);color:var(--dk-brand);background:var(--dk-brand-soft);font-weight:700}.mood-icon{font-size:30rpx;line-height:1}
+.mood-options{display:flex;gap:10rpx;margin-top:22rpx;overflow-x:auto}.mood-option{display:flex;width:106rpx;height:94rpx;flex:0 0 106rpx;align-items:center;justify-content:center;gap:6rpx;border:1rpx solid var(--dk-line);border-radius: var(--dk-radius-md, 18rpx);color:var(--dk-muted);background:var(--dk-bg);font-size:19rpx;flex-direction:column;box-sizing:border-box}.mood-option.on{border-color:var(--dk-brand);color:var(--dk-brand);background:var(--dk-brand-soft);font-weight:700}.mood-icon{font-size:30rpx;line-height:1}
 .field-label {
   display: block;
   margin-bottom: 14rpx;
@@ -386,7 +386,7 @@ async function onSave() {
   padding: 0 22rpx;
   background: var(--dk-bg, #f2f4f3);
   border: 1rpx solid transparent;
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   box-sizing: border-box;
 }
 .input-wrap:focus-within {
@@ -416,7 +416,7 @@ async function onSave() {
   line-height: 92rpx;
   font-size: var(--dk-fs-body, 28rpx);
   font-weight: 600;
-  border-radius: 18rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   border: none;
   margin: 0;
   &::after {

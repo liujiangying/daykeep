@@ -2,7 +2,7 @@
   <view class="page" :style="pageStyle">
     <view class="nav" :style="navStyle">
       <view class="nav-inner" :style="navInnerStyle">
-        <text v-if="activeSection !== 'root'" class="nav-back" @tap="backToMine">‹</text>
+        <view v-if="activeSection !== 'root'" class="nav-back dk-hit" hover-class="dk-press" :hover-stay-time="60" @tap="backToMine">‹</view>
         <text class="brand">{{ minePageTitle }}</text>
       </view>
     </view>
@@ -11,7 +11,7 @@
     <view class="content">
       <template v-if="activeSection === 'root'">
         <view class="section profile-section">
-          <view class="row user-row" :class="{ tap: loggedIn }" @tap="goEditProfile">
+          <view class="row user-row" :class="{ tap: loggedIn }" :hover-class="loggedIn ? 'dk-press' : 'none'" :hover-stay-time="60" @tap="goEditProfile">
             <view class="user-left">
               <view class="avatar-wrap">
                 <image v-if="loggedIn && user?.avatarUrl" class="avatar-img" :src="user.avatarUrl" mode="aspectFill" />
@@ -31,7 +31,7 @@
             <text v-if="loggedIn" class="arrow">›</text>
           </view>
           <view v-if="!loggedIn" class="actions">
-            <button class="btn" :style="primaryBtnStyle" @tap="goLogin">微信登录</button>
+            <button class="btn" :style="primaryBtnStyle" hover-class="dk-press" :hover-stay-time="60" @tap="goLogin">微信登录</button>
           </view>
           <view v-if="loggedIn" class="mood-week">
             <view class="mood-week-head">
@@ -43,6 +43,8 @@
                 :key="day.date"
                 class="mood-day"
                 :class="{ editable: isTodayMoodDay(day) }"
+                :hover-class="isTodayMoodDay(day) ? 'dk-press' : 'none'"
+                :hover-stay-time="60"
                 @tap="quickEditMood(day)"
               >
                 <view class="mood-day-icon">
@@ -54,7 +56,7 @@
           </view>
         </view>
 
-        <view v-if="featuredInsight" class="section care-note" @tap="showInsight">
+        <view v-if="featuredInsight" class="section care-note" hover-class="dk-press" :hover-stay-time="60" @tap="showInsight">
           <text class="care-note-spark">✦</text>
           <view class="care-note-copy">
             <text class="care-note-kicker">{{ insightKicker }}</text>
@@ -64,7 +66,7 @@
           <view class="care-note-action"><text>去看看</text><text>›</text></view>
         </view>
 
-        <view class="root-section-head spaces-head" :class="{ tap: spacesCanFold }" @tap="toggleSpaces">
+        <view class="root-section-head spaces-head" :class="{ tap: spacesCanFold }" :hover-class="spacesCanFold ? 'dk-press' : 'none'" :hover-stay-time="60" @tap="toggleSpaces">
           <text class="root-section-label">我的空间</text>
           <view class="section-head-right">
             <text>{{ spacesSummary }}</text>
@@ -72,18 +74,18 @@
           </view>
         </view>
         <view v-if="spaces.length" class="section mine-menu spaces-menu">
-          <view v-for="space in visibleSpaces" :key="space.id" class="row tap" @tap="goSpaceDetail(space.id)">
-            <view class="space-cover-thumb"><image v-if="space.coverUrl" :src="space.coverUrl" mode="aspectFill" /></view>
+          <view v-for="space in visibleSpaces" :key="space.id" class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="goSpaceDetail(space.id)">
+            <view class="space-cover-thumb"><DkImg v-if="space.coverUrl" :src="space.coverUrl" /></view>
             <view class="row-copy"><view class="space-row-title"><text class="row-title">{{ space.name }}</text><text v-if="space.isOfficial" class="official-space-badge">官方公开</text></view><text class="row-desc" :class="{ 'space-dissolved-desc': space.dissolvedAt }">{{ spaceRowDesc(space) }}</text></view>
             <text class="arrow">›</text>
           </view>
         </view>
-        <button v-if="officialExperience && !hasJoinedOfficial" class="join-official-cta" :loading="joiningOfficial" :disabled="joiningOfficial" @tap="joinOfficial">
+        <button v-if="officialExperience && !hasJoinedOfficial" class="join-official-cta" hover-class="dk-press" :hover-stay-time="60" :loading="joiningOfficial" :disabled="joiningOfficial" @tap="joinOfficial">
           <text class="join-official-mark">✦</text>
           <view class="create-space-copy"><text>加入官方体验圈</text><text>公开浏览，随时可以退出</text></view>
           <text class="create-space-arrow">›</text>
         </button>
-        <button class="create-space-cta" @tap="goCreateSpace">
+        <button class="create-space-cta" hover-class="dk-press" :hover-stay-time="60" @tap="goCreateSpace">
           <text class="create-space-plus">＋</text>
           <view class="create-space-copy"><text>创建新时光圈</text><text>邀请家人、朋友一起记录</text></view>
           <text class="create-space-arrow">›</text>
@@ -91,41 +93,41 @@
 
         <text class="root-section-label">应用设置</text>
         <view class="section mine-menu">
-          <view class="row tap" @tap="openMineSection('data')">
+          <view class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="openMineSection('data')">
             <view class="row-copy"><text class="row-title">隐私设置</text></view>
             <text class="arrow">›</text>
           </view>
-          <view v-if="holidaySettingsVisible" class="row tap" @tap="goHolidays">
+          <view v-if="holidaySettingsVisible" class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="goHolidays">
             <view class="row-copy"><text class="row-title">好日子设置</text></view>
             <text class="arrow">›</text>
           </view>
-          <view class="row tap" @tap="togglePrefs">
+          <view class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="togglePrefs">
             <view class="row-copy"><text class="row-title">个性化设置</text></view>
             <text class="fold-arrow" :class="{ open: prefsExpanded }">›</text>
           </view>
-          <view v-if="prefsExpanded" class="prefs-inline">
-            <view class="row preference-row tap" @tap="togglePanel('theme')"><text>主题</text><view class="row-right"><text class="muted-r">{{ currentThemeName }}</text><text class="fold-arrow" :class="{ open: openPanel === 'theme' }">›</text></view></view>
-            <view v-if="openPanel === 'theme'" class="panel">
-              <view v-for="t in themeList" :key="t.id" class="panel-row tap" @tap.stop="pickTheme(t.id)"><text class="panel-name">{{ t.name }}</text><text class="check" :style="{ color: tokens.brand }">{{ themeId === t.id ? '✓' : '' }}</text></view>
+          <view v-if="prefsExpanded" class="prefs-inline panel-in">
+            <view class="row preference-row tap" hover-class="dk-press" :hover-stay-time="60" @tap="togglePanel('theme')"><text>主题</text><view class="row-right"><text class="muted-r">{{ currentThemeName }}</text><text class="fold-arrow" :class="{ open: openPanel === 'theme' }">›</text></view></view>
+            <view v-if="openPanel === 'theme'" class="panel panel-in">
+              <view v-for="t in themeList" :key="t.id" class="panel-row tap" hover-class="dk-press" :hover-stay-time="60" @tap.stop="pickTheme(t.id)"><text class="panel-name">{{ t.name }}</text><text class="check" :style="{ color: tokens.brand }">{{ themeId === t.id ? '✓' : '' }}</text></view>
             </view>
-            <view class="row preference-row tap" @tap="togglePanel('font')"><text>字体大小</text><view class="row-right"><text class="muted-r">{{ currentFontSizeLabel }}</text><text class="fold-arrow" :class="{ open: openPanel === 'font' }">›</text></view></view>
-            <view v-if="openPanel === 'font'" class="panel">
-              <view v-for="opt in fontSizeOptions" :key="opt.id" class="panel-row tap" @tap.stop="pickFontSize(opt.id)"><text class="panel-name">{{ opt.label }}</text><text class="check" :style="{ color: tokens.brand }">{{ fontSize === opt.id ? '✓' : '' }}</text></view>
+            <view class="row preference-row tap" hover-class="dk-press" :hover-stay-time="60" @tap="togglePanel('font')"><text>字体大小</text><view class="row-right"><text class="muted-r">{{ currentFontSizeLabel }}</text><text class="fold-arrow" :class="{ open: openPanel === 'font' }">›</text></view></view>
+            <view v-if="openPanel === 'font'" class="panel panel-in">
+              <view v-for="opt in fontSizeOptions" :key="opt.id" class="panel-row tap" hover-class="dk-press" :hover-stay-time="60" @tap.stop="pickFontSize(opt.id)"><text class="panel-name">{{ opt.label }}</text><text class="check" :style="{ color: tokens.brand }">{{ fontSize === opt.id ? '✓' : '' }}</text></view>
             </view>
           </view>
         </view>
         <text class="root-section-label support-label">帮助与支持</text>
         <view class="section support-menu">
-          <view class="row tap" @tap="goGuide"><text>使用指南</text><text class="arrow">›</text></view>
-          <view class="row tap" @tap="goFeedback"><text>帮助与反馈</text><text class="arrow">›</text></view>
-          <view class="row tap" @tap="showAbout"><text>关于我们</text><text class="arrow">›</text></view>
+          <view class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="goGuide"><text>使用指南</text><text class="arrow">›</text></view>
+          <view class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="goFeedback"><text>帮助与反馈</text><text class="arrow">›</text></view>
+          <view class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="showAbout"><text>关于我们</text><text class="arrow">›</text></view>
           <!-- #ifdef MP-WEIXIN -->
-          <button class="row share-row" open-type="share"><text>分享小程序</text><text class="arrow">›</text></button>
+          <button class="row share-row" hover-class="dk-press" :hover-stay-time="60" open-type="share"><text>分享小程序</text><text class="arrow">›</text></button>
           <!-- #endif -->
         </view>
         <view class="mine-footer">
           <text class="mine-quote">有些生活不必公开，只想留给我们</text>
-          <view v-if="loggedIn" class="logout-wrap"><button class="btn ghost" :style="ghostBtnStyle" @tap="doLogout">退出登录</button></view>
+          <view v-if="loggedIn" class="logout-wrap"><button class="btn ghost" :style="ghostBtnStyle" hover-class="dk-press" :hover-stay-time="60" @tap="doLogout">退出登录</button></view>
         </view>
       </template>
 
@@ -134,7 +136,7 @@
           <text class="sec-title">账号信息</text>
           <view class="data-card">
             <!-- #ifdef MP-WEIXIN -->
-            <button v-if="loggedIn && !boundPhone" class="row bind-phone-row" open-type="getPhoneNumber" :disabled="bindingPhone" @getphonenumber="onGetPhoneNumber">
+            <button v-if="loggedIn && !boundPhone" class="row bind-phone-row" hover-class="dk-press" :hover-stay-time="60" open-type="getPhoneNumber" :disabled="bindingPhone" @getphonenumber="onGetPhoneNumber">
               <text class="row-title">手机号</text>
               <text class="phone-action">{{ bindingPhone ? '绑定中…' : '去绑定 ›' }}</text>
             </button>
@@ -167,19 +169,19 @@
         <view class="data-group">
           <text class="sec-title">记录与存储</text>
           <view class="data-card">
-            <view class="row tap export-row" @tap="exportData"><view class="row-copy"><text class="row-title">导出我的记录</text><text class="row-desc">导出为 CSV，不包含共同记录和图片</text></view><text class="arrow">›</text></view>
-            <view class="row tap" @tap="clearCache"><view class="row-copy"><text class="row-title">清除本地缓存</text><text class="row-desc">不会删除云端记录</text></view><text class="arrow">›</text></view>
+            <view class="row tap export-row" hover-class="dk-press" :hover-stay-time="60" @tap="exportData"><view class="row-copy"><text class="row-title">导出我的记录</text><text class="row-desc">导出为 CSV，不包含共同记录和图片</text></view><text class="arrow">›</text></view>
+            <view class="row tap" hover-class="dk-press" :hover-stay-time="60" @tap="clearCache"><view class="row-copy"><text class="row-title">清除本地缓存</text><text class="row-desc">不会删除云端记录</text></view><text class="arrow">›</text></view>
           </view>
         </view>
       </view>
 
     </view>
 
-    <view v-if="moodPickerOpen" class="mood-picker-mask" @tap="closeMoodPicker">
-      <view class="mood-picker-sheet" @tap.stop>
+    <view v-if="moodPickerOpen" class="mood-picker-mask dk-mask-in" @tap="closeMoodPicker">
+      <view class="mood-picker-sheet dk-sheet-up" @tap.stop>
         <view class="mood-picker-head">
           <view><text class="mood-picker-title">今日心情</text><text class="mood-picker-sub">选择后，时光圈成员可以看到你今天的状态</text></view>
-          <text class="mood-picker-close" @tap="closeMoodPicker">×</text>
+          <view class="mood-picker-close dk-hit" hover-class="dk-press" :hover-stay-time="60" @tap="closeMoodPicker">×</view>
         </view>
         <view class="mood-picker-options">
           <view
@@ -187,6 +189,8 @@
             :key="item.value"
             class="mood-picker-option"
             :class="{ on: currentTodayMood === item.value }"
+            hover-class="dk-press"
+            :hover-stay-time="60"
             @tap="chooseQuickMood(item.value)"
           >
             <MoodIcon class="mood-picker-icon" :mood="item.value" size="picker" />
@@ -195,6 +199,8 @@
           <view
             class="mood-picker-option"
             :class="{ on: currentTodayMood.startsWith('custom:') || customMoodEditing }"
+            hover-class="dk-press"
+            :hover-stay-time="60"
             @tap="openCustomMood"
           >
             <MoodIcon class="mood-picker-icon" :mood="currentTodayMood.startsWith('custom:') ? currentTodayMood : ''" size="picker" empty="＋" />
@@ -211,7 +217,7 @@
             :focus="customMoodEditing"
             @confirm="saveCustomMood"
           />
-          <button class="custom-mood-save" @tap="saveCustomMood">使用</button>
+          <button class="custom-mood-save" hover-class="dk-press" :hover-stay-time="60" @tap="saveCustomMood">使用</button>
         </view>
         <text v-if="customMoodEditing" class="custom-mood-tip">仅支持一个 Emoji 表情，不支持文字或普通符号</text>
       </view>
@@ -253,6 +259,7 @@ import { getPreferredSpaceId, setPreferredSpaceId } from '@/services/spacePrefer
 import { normalizeMoodDate, normalizeMoodWeek, shanghaiDateKey } from '@/utils/mood'
 import { encodeCustomMood, MOOD_OPTIONS, moodIconForValue, moodLabelForValue } from '@/shared/mood'
 import MoodIcon from '@/components/MoodIcon.vue'
+import DkImg from '@/components/DkImg.vue'
 import { trackProductEvent } from '@/services/analytics'
 
 const { themeId, pageStyle, refreshTheme } = useThemePage()
@@ -1002,13 +1009,11 @@ onShareTimeline(() => ({
   margin-top: 0;
   padding: 0 24rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.72);
-  border-radius: 24rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 254, 251, 0.08) 42%),
     var(--dk-surface, #fffefb);
-  box-shadow:
-    0 16rpx 36rpx rgba(47, 111, 106, 0.07),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07));
 }
 .care-note {
   position: relative;
@@ -1019,11 +1024,10 @@ onShareTimeline(() => ({
   overflow: hidden;
   padding: 30rpx 28rpx 28rpx;
   border: 1rpx solid rgba(176,137,72,.14);
-  border-radius: 30rpx;
+  border-radius: var(--dk-radius-xl, 32rpx);
   background: radial-gradient(circle at 92% 12%,rgba(255,255,255,.76),transparent 26%),linear-gradient(138deg,#fff8eb 0%,#f4f5e9 48%,#e6f1ee 100%);
   box-shadow: 0 14rpx 38rpx rgba(82,72,45,.055);
 }
-.care-note:active { opacity: .78; }
 .care-note-spark {
   position: absolute;
   top: 20rpx;
@@ -1037,7 +1041,7 @@ onShareTimeline(() => ({
 }
 .care-note-kicker {
   display: block;
-  color: #8b7445;
+  color: var(--dk-gold, #8b7445);
   font-size: var(--dk-fs-caption, 23rpx);
   font-weight: 650;
 }
@@ -1052,7 +1056,7 @@ onShareTimeline(() => ({
 .care-note-desc {
   display: block;
   margin-top: 9rpx;
-  color: #626a65;
+  color: var(--dk-muted, #626a65);
   font-size: var(--dk-fs-meta, 25rpx);
   line-height: 1.55;
 }
@@ -1062,7 +1066,7 @@ onShareTimeline(() => ({
   align-items: center;
   gap: 5rpx;
   padding-bottom: 2rpx;
-  color: #1c2423;
+  color: var(--dk-ink, #1c2423);
   font-size: var(--dk-fs-caption, 23rpx);
   font-weight: 700;
 }
@@ -1073,10 +1077,10 @@ onShareTimeline(() => ({
 .spaces-menu .row{justify-content:flex-start;gap:16rpx}
 .spaces-menu .row-copy{flex:1}
 .spaces-menu .arrow{margin-left:auto}
-.space-dissolved-desc{color:#a85f57}
+.space-dissolved-desc{color:var(--dk-danger,#a85f57)}
 .space-cover-thumb{width:66rpx;height:66rpx;flex-shrink:0;overflow:hidden;border-radius:18rpx;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.6),transparent 35%),linear-gradient(145deg,#b5d5cd,#ecd8b1)}.space-cover-thumb image{display:block;width:100%;height:100%}
 .space-row-title{display:flex;min-width:0;align-items:center;gap:10rpx}.official-space-badge{flex-shrink:0;padding:4rpx 9rpx;border-radius:999rpx;color:var(--dk-feature-brand,#2f6f6a);background:var(--dk-feature-brand-soft,#e4f0ee);font-size:17rpx;font-weight:700}
-.join-official-cta{display:flex;width:100%;min-height:96rpx;margin:0 0 14rpx;padding:18rpx 22rpx;align-items:center;gap:18rpx;border:1rpx solid rgba(47,111,106,.12);border-radius:22rpx;color:var(--dk-ink);background:linear-gradient(135deg,var(--dk-feature-brand-soft,#e4f0ee),rgba(255,255,255,.8));line-height:1.35;text-align:left;box-sizing:border-box}.join-official-cta::after{border:0}.join-official-mark{display:flex;width:54rpx;height:54rpx;flex-shrink:0;align-items:center;justify-content:center;border-radius:18rpx;color:#fff;background:var(--dk-feature-brand,#2f6f6a);font-size:24rpx}
+.join-official-cta{display:flex;width:100%;min-height:96rpx;margin:0 0 14rpx;padding:18rpx 22rpx;align-items:center;gap:18rpx;border:1rpx solid rgba(47,111,106,.12);border-radius:var(--dk-radius-lg,24rpx);color:var(--dk-ink);background:linear-gradient(135deg,var(--dk-feature-brand-soft,#e4f0ee),rgba(255,255,255,.8));line-height:1.35;text-align:left;box-sizing:border-box}.join-official-cta::after{border:0}.join-official-mark{display:flex;width:54rpx;height:54rpx;flex-shrink:0;align-items:center;justify-content:center;border-radius:var(--dk-radius-md,18rpx);color:#fff;background:var(--dk-feature-brand,#2f6f6a);font-size:24rpx}
 .create-space-cta {
   display: flex;
   width: 100%;
@@ -1087,7 +1091,7 @@ onShareTimeline(() => ({
   align-items: center;
   gap: 18rpx;
   border: 2rpx dashed rgba(47,111,106,.26);
-  border-radius: 22rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   background: rgba(47,111,106,.045);
   color: var(--dk-brand, #2f6f6a);
   line-height: 1.35;
@@ -1095,7 +1099,6 @@ onShareTimeline(() => ({
   box-sizing: border-box;
 }
 .create-space-cta::after { border: 0; }
-.create-space-cta:active { opacity: .72; }
 .create-space-plus { display: flex; width: 54rpx; height: 54rpx; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: var(--dk-brand-soft, #e1efec); font-size: 34rpx; font-weight: 400; line-height: 1; }
 .create-space-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; }
 .create-space-copy text:first-child { font-size: var(--dk-fs-label, 28rpx); font-weight: 700; }
@@ -1142,20 +1145,19 @@ onShareTimeline(() => ({
   margin-bottom: 44rpx;
   padding: 26rpx 24rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.72);
-  border-radius: 26rpx;
+  border-radius: var(--dk-radius-xl, 32rpx);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(231, 242, 239, 0.18) 48%),
     var(--dk-surface, #fffefb);
-  box-shadow:
-    0 16rpx 36rpx rgba(47, 111, 106, 0.07),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07));
 }
 .root-section-label {
   display: block;
   margin: 0 4rpx 15rpx;
   color: var(--dk-muted, #6b736f);
   font-size: var(--dk-fs-caption, 23rpx);
-  letter-spacing: .08em;
+  font-weight: 600;
+  letter-spacing: .1em;
 }
 .sub-section {
   padding-top: 0;
@@ -1167,20 +1169,19 @@ onShareTimeline(() => ({
   display: block;
   margin: 0 8rpx 13rpx;
   font-size: var(--dk-fs-meta, 22rpx);
-  letter-spacing: .06em;
+  font-weight: 600;
+  letter-spacing: .08em;
   color: var(--dk-muted, #6b736f);
 }
 .data-card {
   overflow: hidden;
   padding: 0 24rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.72);
-  border-radius: 24rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 254, 251, 0.08) 42%),
     var(--dk-surface, #fffefb);
-  box-shadow:
-    0 16rpx 36rpx rgba(47, 111, 106, 0.07),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07));
 }
 .data-card > .row:last-child,
 .data-card > .privacy-row:last-child {
@@ -1257,9 +1258,6 @@ onShareTimeline(() => ({
 .phone-action { flex-shrink: 0; color: var(--dk-brand); font-size: var(--dk-fs-meta, 23rpx); font-weight: 650; }
 .phone-bound-row { border-bottom: 0; }
 .phone-status { flex-shrink:0; color:var(--dk-muted); font-size:var(--dk-fs-meta,22rpx); }
-.tap:active {
-  opacity: 0.7;
-}
 .check {
   flex-shrink: 0;
   font-size: var(--dk-fs-title, 30rpx);
@@ -1286,16 +1284,15 @@ onShareTimeline(() => ({
 }
 .avatar-wrap { position: relative; flex-shrink: 0; }
 .avatar-mood { position: absolute; right: -5rpx; bottom: -4rpx; display: flex; width: 38rpx; height: 38rpx; align-items: center; justify-content: center; border: 4rpx solid var(--dk-surface, #fff); border-radius: 50%; background: var(--dk-bg-soft); font-size: 21rpx; line-height: 1; box-sizing: border-box; }
-.mood-week { margin-top: 14rpx; padding-top: 14rpx; border-top: 1rpx solid #e2e7e4; }
-.mood-week-head{display:flex;align-items:center;gap:12rpx;min-width:0}.mood-week-title{flex-shrink:0;color:#26302e;font-size:24rpx;font-weight:700}.mood-week-summary{min-width:0;overflow:hidden;color:#79817d;font-size:22rpx;text-overflow:ellipsis;white-space:nowrap}
+.mood-week { margin-top: 14rpx; padding-top: 14rpx; border-top: 1rpx solid var(--dk-line, #e2e7e4); }
+.mood-week-head{display:flex;align-items:center;gap:12rpx;min-width:0}.mood-week-title{flex-shrink:0;color:var(--dk-ink,#26302e);font-size:24rpx;font-weight:700}.mood-week-summary{min-width:0;overflow:hidden;color:var(--dk-muted,#79817d);font-size:22rpx;text-overflow:ellipsis;white-space:nowrap}
 .mood-week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6rpx; margin-top: 10rpx; }
 .mood-day { display: flex; flex-direction: column; align-items: center; gap: 3rpx; }
 .mood-day.editable { cursor: pointer; }
-.mood-day.editable:active { opacity: .62; }
-.mood-day-icon { display: flex; width: 34rpx; height: 34rpx; align-items: center; justify-content: center; border-radius: 50%; background: #eef2f0; color: #79817d; font-size: 20rpx; }
-.mood-day.editable .mood-day-icon { color: #1c2423; background: transparent; }
-.mood-day.editable .mood-day-label { color: #1c2423; font-weight: 650; }
-.mood-day-label { color: #79817d; font-size: 20rpx; }
+.mood-day-icon { display: flex; width: 34rpx; height: 34rpx; align-items: center; justify-content: center; border-radius: 50%; background: var(--dk-bg-soft, #eef2f0); color: var(--dk-muted, #79817d); font-size: 20rpx; }
+.mood-day.editable .mood-day-icon { color: var(--dk-ink, #1c2423); background: transparent; }
+.mood-day.editable .mood-day-label { color: var(--dk-ink, #1c2423); font-weight: 650; }
+.mood-day-label { color: var(--dk-muted, #79817d); font-size: 20rpx; }
 .mood-picker-mask{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;background:rgba(18,25,24,.34)}
 .mood-picker-sheet{width:100%;padding:30rpx 28rpx calc(28rpx + env(safe-area-inset-bottom));border-radius:30rpx 30rpx 0 0;background:var(--dk-surface,#fff);box-shadow:0 -14rpx 44rpx rgba(31,61,57,.12);box-sizing:border-box}
 .mood-picker-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20rpx}
@@ -1353,7 +1350,7 @@ onShareTimeline(() => ({
   height: 72rpx;
   line-height: 72rpx;
   font-size: var(--dk-fs-body, 28rpx);
-  border-radius: 10rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   border: none;
   margin: 0;
   &::after {
@@ -1371,6 +1368,10 @@ onShareTimeline(() => ({
   padding: 2rpx 0 8rpx 12rpx;
   margin-bottom: 4rpx;
   border-bottom: 1rpx solid var(--dk-line, #e2e6e4);
+}
+.panel-in { animation: panel-in .18s ease backwards; }
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(-6rpx); }
 }
 .panel-row {
   display: flex;

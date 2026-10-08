@@ -1,5 +1,5 @@
 <template>
-  <view class="invite-page">
+  <view class="invite-page" :style="pageStyle">
     <view class="glow glow-one" />
     <view class="glow glow-two" />
 
@@ -64,7 +64,10 @@
 import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { request } from '@/api/request'
+import { useThemePage } from '@/composables/useThemePage'
 import { isLoggedIn } from '@/services/auth'
+
+const { pageStyle } = useThemePage()
 
 const POST_LOGIN_REDIRECT_KEY = 'dk_post_login_redirect'
 
@@ -214,23 +217,23 @@ onShow(() => {
   box-sizing: border-box;
   overflow: hidden;
   padding: 82rpx 34rpx calc(54rpx + env(safe-area-inset-bottom));
-  color: #18302d;
+  color: var(--dk-ink, #18302d);
   background: linear-gradient(160deg, #edf6f3 0%, #f8f4ec 56%, #eef5f2 100%);
 }
 .glow { position: absolute; border-radius: 50%; filter: blur(8rpx); pointer-events: none; }
 .glow-one { width: 420rpx; height: 420rpx; top: -180rpx; right: -150rpx; background: rgba(73,142,132,.18); }
 .glow-two { width: 360rpx; height: 360rpx; bottom: -150rpx; left: -130rpx; background: rgba(220,181,112,.16); }
 .invite-wrap { position: relative; z-index: 1; max-width: 680rpx; margin: 0 auto; }
-.eyebrow { margin: 0 0 22rpx 8rpx; color: #39766f; font-size: 24rpx; font-weight: 650; letter-spacing: 5rpx; }
-.invite-card { padding: 34rpx; border: 1rpx solid rgba(47,111,106,.14); border-radius: 34rpx; background: rgba(255,255,255,.9); box-shadow: 0 24rpx 70rpx rgba(36,73,68,.12); }
+.eyebrow { margin: 0 0 22rpx 8rpx; color: var(--dk-brand, #39766f); font-size: 24rpx; font-weight: 650; letter-spacing: 5rpx; }
+.invite-card { padding: 34rpx; border: 1rpx solid rgba(47,111,106,.14); border-radius: var(--dk-radius-xl, 32rpx); background: rgba(255,255,255,.9); box-shadow: var(--dk-shadow-card, 0 24rpx 70rpx rgba(36,73,68,.12)); }
 .inviter-row { display: flex; align-items: center; gap: 20rpx; }
-.avatar { width: 86rpx; height: 86rpx; flex: 0 0 auto; border: 5rpx solid #fff; border-radius: 50%; box-shadow: 0 6rpx 20rpx rgba(33,71,66,.13); }
+.avatar { width: 86rpx; height: 86rpx; flex: 0 0 auto; border: 5rpx solid #fff; border-radius: 50%; box-shadow: var(--dk-shadow-soft, 0 6rpx 20rpx rgba(33,71,66,.13)); }
 .avatar-placeholder { display: flex; align-items: center; justify-content: center; color: var(--dk-feature-brand,#2f6f6a); background: var(--dk-feature-brand-soft,#e4f0ee); font-size: 34rpx; }
 .inviter-copy { min-width: 0; }
 .inviter-name,.inviter-action { display: block; }
 .inviter-name { font-size: 30rpx; font-weight: 700; }
-.inviter-action { margin-top: 6rpx; color: #71817d; font-size: 23rpx; }
-.day-card { margin-top: 32rpx; padding: 46rpx 34rpx; border-radius: 28rpx; color: #f8f5e9; text-align: center; background: linear-gradient(145deg, #245e58 0%, #173f3b 100%); box-shadow: inset 0 1rpx rgba(255,255,255,.16); }
+.inviter-action { margin-top: 6rpx; color: var(--dk-muted, #71817d); font-size: 23rpx; }
+.day-card { margin-top: 32rpx; padding: 46rpx 34rpx; border-radius: var(--dk-radius-lg, 24rpx); color: #f8f5e9; text-align: center; background: linear-gradient(145deg, #245e58 0%, #173f3b 100%); box-shadow: inset 0 1rpx rgba(255,255,255,.16); }
 .day-label,.day-title,.day-date,.day-copy,.space-copy { display: block; }
 .day-label { color: #b8d6cf; font-size: 21rpx; letter-spacing: 7rpx; }
 .day-title { margin-top: 24rpx; font-size: 43rpx; line-height: 1.35; font-weight: 720; }
@@ -238,17 +241,17 @@ onShow(() => {
 .day-rule { width: 54rpx; height: 2rpx; margin: 30rpx auto; background: rgba(255,255,255,.35); }
 .day-copy { color: rgba(255,255,255,.76); font-size: 23rpx; line-height: 1.7; }
 .space-copy { margin-top: 18rpx; padding-top: 16rpx; border-top: 1rpx solid rgba(255,255,255,.18); color: rgba(255,255,255,.9); font-size: 22rpx; line-height: 1.6; }
-.meta-row { display: flex; justify-content: space-between; gap: 20rpx; margin-top: 26rpx; color: #788682; font-size: 21rpx; }
-.join-button,.ghost-button { border: 0; border-radius: 999rpx; font-weight: 700; }
-.join-button { height: 92rpx; margin-top: 34rpx; color: #fff; background: #2f6f6a; font-size: 29rpx; line-height: 92rpx; box-shadow: 0 14rpx 32rpx rgba(47,111,106,.2); }
+.meta-row { display: flex; justify-content: space-between; gap: 20rpx; margin-top: 26rpx; color: var(--dk-muted, #788682); font-size: 21rpx; }
+.join-button,.ghost-button { border: 0; border-radius: var(--dk-radius-pill, 999rpx); font-weight: 700; }
+.join-button { height: 92rpx; margin-top: 34rpx; color: #fff; background: var(--dk-brand, #2f6f6a); font-size: 29rpx; line-height: 92rpx; box-shadow: 0 14rpx 32rpx rgba(47,111,106,.2); }
 .join-button::after,.ghost-button::after { border: 0; }
 .join-button[disabled] { color: #8d9996; background: #dce5e2; box-shadow: none; }
-.privacy-copy { display: block; margin-top: 20rpx; color: #87938f; font-size: 20rpx; text-align: center; }
-.state-card { position: relative; z-index: 1; display: flex; min-height: 440rpx; flex-direction: column; align-items: center; justify-content: center; padding: 42rpx; border-radius: 32rpx; background: rgba(255,255,255,.88); color: #657570; text-align: center; }
-.loading-dot { width: 28rpx; height: 28rpx; margin-bottom: 22rpx; border: 5rpx solid #c8d9d5; border-top-color: #2f6f6a; border-radius: 50%; animation: spin .8s linear infinite; }
-.state-mark { display: flex; width: 72rpx; height: 72rpx; align-items: center; justify-content: center; border-radius: 50%; color: #9a6a5e; background: #f2e7e2; font-size: 38rpx; }
-.state-title { margin-top: 24rpx; color: #263d39; font-size: 30rpx; font-weight: 700; }
+.privacy-copy { display: block; margin-top: 20rpx; color: var(--dk-muted, #87938f); font-size: 20rpx; text-align: center; }
+.state-card { position: relative; z-index: 1; display: flex; min-height: 440rpx; flex-direction: column; align-items: center; justify-content: center; padding: 42rpx; border-radius: var(--dk-radius-xl, 32rpx); background: rgba(255,255,255,.88); color: var(--dk-muted, #657570); text-align: center; }
+.loading-dot { width: 28rpx; height: 28rpx; margin-bottom: 22rpx; border: 5rpx solid #c8d9d5; border-top-color: var(--dk-brand, #2f6f6a); border-radius: 50%; animation: spin .8s linear infinite; }
+.state-mark { display: flex; width: 72rpx; height: 72rpx; align-items: center; justify-content: center; border-radius: 50%; color: var(--dk-danger, #9a6a5e); background: var(--dk-danger-soft, #f2e7e2); font-size: 38rpx; }
+.state-title { margin-top: 24rpx; color: var(--dk-ink, #263d39); font-size: 30rpx; font-weight: 700; }
 .state-copy { margin-top: 12rpx; font-size: 23rpx; line-height: 1.6; }
-.ghost-button { width: 260rpx; height: 76rpx; margin-top: 32rpx; color: #2f6f6a; background: #e0efeb; font-size: 25rpx; line-height: 76rpx; }
+.ghost-button { width: 260rpx; height: 76rpx; margin-top: 32rpx; color: var(--dk-brand, #2f6f6a); background: var(--dk-brand-soft, #e0efeb); font-size: 25rpx; line-height: 76rpx; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

@@ -11,21 +11,30 @@
       "path": "pages/timeline/index",
       "style": {
         "navigationStyle": "custom",
-        "navigationBarTextStyle": "black"
+        "navigationBarTextStyle": "black",
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "dark",
+        "backgroundColor": "#f2f4f3"
       }
     },
     {
       "path": "pages/notes/index",
       "style": {
         "navigationStyle": "custom",
-        "navigationBarTextStyle": "black"
+        "navigationBarTextStyle": "black",
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "dark",
+        "backgroundColor": "#f2f4f3"
       }
     },
     {
       "path": "pages/reminders/index",
       "style": {
         "navigationStyle": "custom",
-        "navigationBarTextStyle": "black"
+        "navigationBarTextStyle": "black",
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "dark",
+        "backgroundColor": "#f2f4f3"
       }
     },
     {

@@ -9,13 +9,27 @@
     <view class="nav-spacer" :style="{ height: navTotalHeight + 'px' }" />
 
     <view v-if="!loggedIn" class="empty login-empty">
-      <text class="empty-title">登录后管理约定</text>
-      <text class="empty-copy">统一查看约定、重要日子、时间胶囊和提醒状态。</text>
-      <button class="login-btn" @tap="goLogin">去登录</button>
+      <DkEmpty mark="✦" title="登录后管理约定" desc="统一查看约定、重要日子、时间胶囊和提醒状态。">
+        <template #action>
+          <button class="login-btn" hover-class="dk-press" :hover-stay-time="60" @tap="goLogin">去登录</button>
+        </template>
+      </DkEmpty>
     </view>
 
     <template v-else>
-      <view class="overview">
+      <view v-if="loading && !reminderSections.length" class="reminders-skeleton">
+        <view class="skeleton-overview">
+          <DkSkeleton type="line" w="48%" h="44rpx" />
+          <DkSkeleton type="line" w="66%" />
+        </view>
+        <view v-for="n in 3" :key="n" class="skeleton-card">
+          <DkSkeleton type="line" w="52%" h="30rpx" />
+          <DkSkeleton type="line" w="86%" />
+          <DkSkeleton type="line" w="34%" h="22rpx" />
+        </view>
+      </view>
+      <template v-else>
+      <view class="overview dk-fade-up">
         <view class="overview-copy">
           <view class="overview-main">
             <text class="overview-value">{{ upcomingCount }}</text>
@@ -28,7 +42,7 @@
         </view>
       </view>
 
-      <view v-if="annualAuthorizationCount" class="annual-tip" @tap="activeFilter = 'off'">
+      <view v-if="annualAuthorizationCount" class="annual-tip" hover-class="dk-press" :hover-stay-time="60" @tap="activeFilter = 'off'">
         <view class="annual-tip-dot" />
         <text class="annual-tip-title">{{ annualAuthorizationCount }} 个年度提醒需重新开启</text>
         <text class="annual-tip-action">查看 ›</text>
@@ -42,7 +56,7 @@
           placeholder="搜索日期、约定、时间胶囊"
           confirm-type="search"
         />
-        <text v-if="searchQuery" class="search-clear" @tap="searchQuery = ''">×</text>
+        <view v-if="searchQuery" class="search-clear dk-hit" hover-class="dk-press" :hover-stay-time="60" @tap="searchQuery = ''">×</view>
       </view>
 
       <scroll-view scroll-x class="filters" :show-scrollbar="false">
@@ -52,6 +66,8 @@
             :key="item.key"
             class="filter"
             :class="{ on: activeFilter === item.key }"
+            hover-class="dk-press"
+            :hover-stay-time="60"
             @tap="activeFilter = item.key"
           >
             <text>{{ item.label }}</text>
@@ -61,7 +77,7 @@
       </scroll-view>
 
       <view v-if="reminderSections.length" class="sections">
-        <view v-for="section in reminderSections" :key="section.key" class="reminder-section">
+        <view v-for="(section, si) in reminderSections" :key="section.key" class="reminder-section">
           <view class="section-head">
             <text class="section-title">{{ section.label }}</text>
             <text class="section-count">{{ section.items.length }} 项</text>
@@ -69,9 +85,13 @@
 
           <view class="list">
             <view
-              v-for="item in section.items"
+              v-for="(item, idx) in section.items"
               :key="item.id"
               class="reminder-card"
+              :class="{ 'dk-fade-up': si < 2 && idx < 4 }"
+              :style="si < 2 && idx < 4 ? { animationDelay: `${(si * 4 + idx) * 45}ms` } : undefined"
+              hover-class="dk-press"
+              :hover-stay-time="60"
               @tap="openReminder(item)"
             >
               <view class="status-rail" :style="statusRailStyle(item)" />
@@ -101,19 +121,25 @@
                     <text class="state-copy" :style="stateCopyStyle(item)">{{ reminderStateCopy(item) }}</text>
                   </view>
                   <view v-if="canRespond(item) && myConfirmStatus(item) === 'pending'" class="commitment-response-actions">
-                    <text
+                    <view
                       class="commitment-response-btn primary"
+                      hover-class="dk-press"
+                      :hover-stay-time="60"
                       @tap.stop="respondToCommitment(item, 'confirmed')"
-                    >确认参加</text>
-                    <text
+                    >确认参加</view>
+                    <view
                       class="commitment-response-btn"
+                      hover-class="dk-press"
+                      :hover-stay-time="60"
                       @tap.stop="respondToCommitment(item, 'declined')"
-                    >暂时无法参加</text>
+                    >暂时无法参加</view>
                   </view>
                   <view
                     v-else-if="canRespond(item)"
                     class="commitment-response-state"
                     :class="myConfirmStatus(item)"
+                    hover-class="dk-press"
+                    :hover-stay-time="60"
                     @tap.stop="changeCommitmentResponse(item)"
                   >
                     <view class="commitment-response-copy">
@@ -122,7 +148,7 @@
                     </view>
                     <text class="commitment-response-change">更改 ›</text>
                   </view>
-                  <button v-if="isCommitment(item) && canCreateMemory(item)" class="memory-btn" @tap.stop="createMemoryFromCommitment(item)">活动结束，留下这次美好回忆</button>
+                  <button v-if="isCommitment(item) && canCreateMemory(item)" class="memory-btn" hover-class="dk-press" :hover-stay-time="60" @tap.stop="createMemoryFromCommitment(item)">活动结束，留下这次美好回忆</button>
                 </template>
               </view>
               <text class="chevron">›</text>
@@ -132,9 +158,9 @@
       </view>
 
       <view v-else class="empty filter-empty">
-        <text class="empty-title">{{ emptyTitle }}</text>
-        <text class="empty-copy">{{ emptyCopy }}</text>
+        <DkEmpty mark="✧" :title="emptyTitle" :desc="emptyCopy" compact />
       </view>
+      </template>
     </template>
 
   </view>
@@ -142,7 +168,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { onShow } from '@dcloudio/uni-app'
+import DkEmpty from '@/components/DkEmpty.vue'
+import DkSkeleton from '@/components/DkSkeleton.vue'
+import { onShow, onPullDownRefresh } from '@dcloudio/uni-app'
 import { isLoggedIn, getCachedUserId, redirectToLoginForSessionError } from '@/services/auth'
 import { confirmCommitment, listEntries, type ConfirmStatus, type Entry } from '@/services/entries'
 import {
@@ -164,6 +192,8 @@ const { pageStyle, themeId } = useThemePage()
 const tokens = computed(() => getTokens(themeId.value))
 const featureTokens = computed(() => getTokens(themeId.value === 'mono' ? 'teal' : themeId.value))
 const loggedIn = ref(false)
+/** 首次加载期间展示贴合布局的骨架，避免空态闪烁。 */
+const loading = ref(true)
 const list = ref<Entry[]>([])
 const activeFilter = ref<ReminderFilter>('all')
 const searchQuery = ref('')
@@ -334,11 +364,11 @@ function reminderStatusLabel(item: Entry) {
 function statusRailStyle(item: Entry) {
   const status = reminderStatus(item)
   if (status === 'capsule') {
-    return { backgroundColor: item.capsuleUnlocked ? '#aeb6b2' : tokens.value.brand }
+    return { backgroundColor: item.capsuleUnlocked ? tokens.value.muted : tokens.value.brand }
   }
-  if (status === 'sent') return { backgroundColor: '#9ca5a1' }
-  if (isUndeliveredReminder(item)) return { backgroundColor: '#e77e6a' }
-  if (status === 'off') return { backgroundColor: '#e9c05a' }
+  if (status === 'sent') return { backgroundColor: tokens.value.muted }
+  if (isUndeliveredReminder(item)) return { backgroundColor: tokens.value.danger }
+  if (status === 'off') return { backgroundColor: tokens.value.gold }
   return { backgroundColor: tokens.value.brand }
 }
 
@@ -346,21 +376,21 @@ function statusTagStyle(item: Entry) {
   const status = reminderStatus(item)
   if (status === 'capsule') {
     return item.capsuleUnlocked
-      ? { backgroundColor: 'rgba(112, 121, 117, .12)', color: '#68716d' }
+      ? { backgroundColor: 'rgba(112, 121, 117, .12)', color: tokens.value.muted }
       : { backgroundColor: featureTokens.value.brandSoft, color: featureTokens.value.brand }
   }
-  if (status === 'sent') return { backgroundColor: 'rgba(112, 121, 117, .12)', color: '#68716d' }
-  if (isUndeliveredReminder(item)) return { backgroundColor: 'rgba(231, 126, 106, .14)', color: '#c65b49' }
-  if (status === 'off') return { backgroundColor: 'rgba(233, 192, 90, .17)', color: '#b98519' }
+  if (status === 'sent') return { backgroundColor: 'rgba(112, 121, 117, .12)', color: tokens.value.muted }
+  if (isUndeliveredReminder(item)) return { backgroundColor: tokens.value.dangerSoft, color: tokens.value.danger }
+  if (status === 'off') return { backgroundColor: tokens.value.goldSoft, color: tokens.value.gold }
   return { backgroundColor: tokens.value.brandSoft, color: tokens.value.brand }
 }
 
 function stateCopyStyle(item: Entry) {
   const status = reminderStatus(item)
-  if (status === 'capsule') return { color: item.capsuleUnlocked ? '#6d7671' : tokens.value.brand }
-  if (status === 'sent') return { color: '#6d7671' }
-  if (isUndeliveredReminder(item)) return { color: '#c65b49' }
-  if (status === 'off') return { color: '#b98519' }
+  if (status === 'capsule') return { color: item.capsuleUnlocked ? tokens.value.muted : tokens.value.brand }
+  if (status === 'sent') return { color: tokens.value.muted }
+  if (isUndeliveredReminder(item)) return { color: tokens.value.danger }
+  if (status === 'off') return { color: tokens.value.gold }
   return { color: tokens.value.brand }
 }
 
@@ -647,8 +677,10 @@ async function load() {
     list.value = []
     spaces.value = []
     currentSpaceId.value = null
+    loading.value = false
     return
   }
+  loading.value = true
   try {
     const preferredId = getPreferredSpaceId() || null
     let loadedSpaces: Space[] | null = null
@@ -671,6 +703,8 @@ async function load() {
       return
     }
     uni.showToast({ title: e?.message || '加载失败', icon: 'none' })
+  } finally {
+    loading.value = false
   }
 }
 
@@ -697,6 +731,14 @@ onShow(() => {
   navBg.value = getTokens(themeId.value).bg
   void load()
 })
+
+onPullDownRefresh(async () => {
+  try {
+    await load()
+  } finally {
+    uni.stopPullDownRefresh()
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -719,9 +761,9 @@ onShow(() => {
 .nav-scope { min-width:0;overflow:hidden;color:var(--dk-muted);font-size:var(--dk-fs-caption, 23rpx);line-height:1.2;text-overflow:ellipsis;white-space:nowrap; }
 .overview {
   display: flex; align-items: center; gap: 24rpx; margin: 16rpx 0 26rpx; padding: 24rpx 26rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.72); border-radius: 22rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.72); border-radius: var(--dk-radius-xl, 32rpx);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 254, 251, 0.08) 42%), var(--dk-surface);
-  box-shadow: 0 16rpx 36rpx rgba(47, 111, 106, 0.07), 0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07));
 }
 .overview-copy { flex: 1; min-width: 0; }
 .overview-main { display: flex; align-items: baseline; gap: 9rpx; }
@@ -731,11 +773,11 @@ onShow(() => {
 .overview-side { display: flex; min-width: 104rpx; padding-left: 24rpx; border-left: 1rpx solid var(--dk-line); flex-direction: column; align-items: center; }
 .overview-side-value { color: var(--dk-ink); font-size: var(--dk-fs-title, 36rpx); font-weight: 600; line-height: 1.15; }
 .overview-side-label { margin-top: 5rpx; color: var(--dk-muted); font-size: var(--dk-fs-caption, 22rpx); }
-.annual-tip { display: flex; align-items: center; gap: 14rpx; min-height: 68rpx; margin: -10rpx 0 26rpx; padding: 0 22rpx; border-radius: 18rpx; background: var(--dk-feature-brand-soft, #e4f0ee); box-sizing: border-box; }
+.annual-tip { display: flex; align-items: center; gap: 14rpx; min-height: 68rpx; margin: -10rpx 0 26rpx; padding: 0 22rpx; border-radius: var(--dk-radius-md, 18rpx); background: var(--dk-feature-brand-soft, #e4f0ee); box-sizing: border-box; }
 .annual-tip-dot { width: 10rpx; height: 10rpx; flex-shrink: 0; border-radius: 50%; background: var(--dk-feature-brand, #2f6f6a); }
 .annual-tip-title { flex: 1; min-width: 0; color: var(--dk-ink, #1c2423); font-size: var(--dk-fs-meta, 24rpx); font-weight: 550; }
 .annual-tip-action { flex-shrink: 0; color: var(--dk-feature-brand, #2f6f6a); font-size: var(--dk-fs-caption, 22rpx); font-weight: 600; }
-.search-field { display: flex; align-items: center; gap: 16rpx; height: 68rpx; margin-bottom: 18rpx; padding: 0 20rpx; border: 1rpx solid rgba(255, 255, 255, 0.65); border-radius: 18rpx; color: var(--dk-muted); background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface)); box-sizing: border-box; box-shadow: 0 8rpx 20rpx rgba(47, 111, 106, 0.04); }
+.search-field { display: flex; align-items: center; gap: 16rpx; height: 68rpx; margin-bottom: 18rpx; padding: 0 20rpx; border: 1rpx solid rgba(255, 255, 255, 0.65); border-radius: var(--dk-radius-md, 18rpx); color: var(--dk-muted); background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface)); box-sizing: border-box; box-shadow: var(--dk-shadow-soft, 0 8rpx 20rpx rgba(47, 111, 106, 0.04)); }
 .search-glyph { position: relative; width: 22rpx; height: 22rpx; flex-shrink: 0; border: 3rpx solid currentColor; border-radius: 50%; box-sizing: border-box; }
 .search-glyph::after { content: ''; position: absolute; right: -7rpx; bottom: -5rpx; width: 9rpx; height: 3rpx; border-radius: 3rpx; background: currentColor; transform: rotate(45deg); transform-origin: left center; }
 .search-input { flex: 1; min-width: 0; height: 66rpx; color: var(--dk-ink); font-size: var(--dk-fs-meta, 24rpx); line-height: 66rpx; }
@@ -751,33 +793,33 @@ onShow(() => {
 .section-title { color: var(--dk-ink); font-size: var(--dk-fs-label, 26rpx); font-weight: 600; }
 .section-count { color: var(--dk-muted); font-size: var(--dk-fs-caption, 22rpx); }
 .list { display: flex; min-width: 0; flex-direction: column; gap: 18rpx; }
-.reminder-card { display: flex; align-items: stretch; min-height: 154rpx; overflow: hidden; border: 1rpx solid rgba(255, 255, 255, 0.65); border-radius: 22rpx; background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface)); box-shadow: 0 16rpx 36rpx rgba(47, 111, 106, 0.07), 0 2rpx 8rpx rgba(28, 36, 35, 0.03); }
-.reminder-card:active { background: var(--dk-bg-soft); box-shadow: none; }
+.reminder-card { display: flex; align-items: stretch; min-height: 154rpx; overflow: hidden; border: 1rpx solid rgba(255, 255, 255, 0.65); border-radius: var(--dk-radius-xl, 32rpx); background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface)); box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07)); }
 .status-rail { flex: 0 0 5rpx; background: #c7cdca; }
-.status-rail.pending { background: var(--dk-brand); }.status-rail.sent { background: #9ca5a1; }.status-rail.off { background: #e9c05a; }
 .card-main { flex: 1; min-width: 0; padding: 21rpx 14rpx 19rpx 22rpx; }
 .card-head { display: flex; align-items: center; gap: 12rpx; }
 .title { flex: 1; min-width: 0; overflow: hidden; font-size: var(--dk-fs-body, 30rpx); font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
 .commitment-tag { flex-shrink: 0; padding: 3rpx 10rpx; border-radius: 999rpx; color: var(--dk-feature-brand, #2f6f6a); background: var(--dk-feature-brand-soft, #e4f0ee); font-size: 20rpx; font-weight: 650; }
 .status-tag { flex-shrink: 0; padding: 3rpx 10rpx; border-radius: 999rpx; font-size: 20rpx; background: var(--dk-brand-soft); color: var(--dk-brand); }
-.status-tag.sent { background: rgba(112, 121, 117, .12); color: #68716d; }.status-tag.off { background: rgba(233, 192, 90, .17); color: #b98519; }
 .date-line { display: block; margin-top: 9rpx; overflow: hidden; color: var(--dk-muted); font-size: var(--dk-fs-meta, 24rpx); text-overflow: ellipsis; white-space: nowrap; }
 .commitment-line { display: block; margin-top: 7rpx; overflow: hidden; color: var(--dk-brand); font-size: var(--dk-fs-caption, 22rpx); text-overflow: ellipsis; white-space: nowrap; }
 .commitment-members{display:flex;margin-top:12rpx}.commitment-member{width:42rpx;height:42rpx;margin-right:-7rpx;padding:0;border:0;border-radius:50%;background:transparent}.commitment-member.confirmed{background:transparent}.commitment-member.declined{opacity:.42}.commitment-avatar{display:flex;width:100%;height:100%;align-items:center;justify-content:center;border:0;border-radius:50%;font-size:17rpx}.commitment-avatar.fallback{color:var(--dk-feature-brand,#2f6f6a);background:var(--dk-feature-brand-soft,#e4f0ee)}
 .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; margin-top: 13rpx; }
-.schedule, .state-copy { overflow: hidden; font-size: var(--dk-fs-caption, 22rpx); text-overflow: ellipsis; white-space: nowrap; }.schedule { color: var(--dk-muted); }.state-copy { max-width: 46%; color: var(--dk-brand); text-align: right; }.status-rail.sent + .card-main .state-copy { color: #6d7671; }.status-rail.off + .card-main .state-copy { color: #b98519; }
+.schedule, .state-copy { overflow: hidden; font-size: var(--dk-fs-caption, 22rpx); text-overflow: ellipsis; white-space: nowrap; }.schedule { color: var(--dk-muted); }.state-copy { max-width: 46%; color: var(--dk-brand); text-align: right; }
 .memory-btn { height: 54rpx; margin: 16rpx 0 0; padding: 0 20rpx; border: 0; border-radius: 999rpx; color: #fff; background: var(--dk-brand); font-size: var(--dk-fs-caption, 23rpx); font-weight: 650; line-height: 54rpx; }
 .memory-btn::after { border: 0; }
 .commitment-response-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; margin-top: 16rpx; }
-.commitment-response-btn { padding: 0 16rpx; border: 1rpx solid var(--dk-line, #dde3e1); border-radius: 14rpx; color: var(--dk-muted); background: transparent; font-size: var(--dk-fs-caption, 23rpx); line-height: 58rpx; text-align: center; }
+.commitment-response-btn { padding: 0 16rpx; border: 1rpx solid var(--dk-line, #dde3e1); border-radius: var(--dk-radius-sm, 12rpx); color: var(--dk-muted); background: transparent; font-size: var(--dk-fs-caption, 23rpx); line-height: 58rpx; text-align: center; }
 .commitment-response-btn.primary { border-color: var(--dk-brand); color: #fff; background: var(--dk-brand); font-weight: 550; }
-.commitment-response-state { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin-top: 16rpx; padding: 14rpx 16rpx; border-radius: 14rpx; background: var(--dk-feature-brand-soft, #e4f0ee); }
+.commitment-response-state { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin-top: 16rpx; padding: 14rpx 16rpx; border-radius: var(--dk-radius-md, 18rpx); background: var(--dk-feature-brand-soft, #e4f0ee); }
 .commitment-response-state.declined { background: var(--dk-bg, #f2f4f3); }
 .commitment-response-copy { display: flex; align-items: center; gap: 9rpx; color: var(--dk-feature-brand, #2f6f6a); font-size: var(--dk-fs-caption, 23rpx); font-weight: 550; }
 .commitment-response-state.declined .commitment-response-copy { color: var(--dk-muted); }
 .commitment-response-mark { font-size: 23rpx; line-height: 1; }
 .commitment-response-change { flex-shrink: 0; color: var(--dk-muted); font-size: 20rpx; }
 .chevron { display: flex; align-items: center; padding: 0 16rpx 0 0; color: var(--dk-line-strong, #aeb8b4); font-size: 36rpx; font-weight: 200; }
-.empty { padding: 110rpx 26rpx; text-align: center; }.empty-title { display: block; color: var(--dk-ink); font-size: 30rpx; font-weight: 500; }.empty-copy { display: block; margin-top: 14rpx; color: var(--dk-muted); font-size: 24rpx; line-height: 1.7; }.filter-empty { padding-top: 90rpx; }
+.empty { padding: 40rpx 26rpx 80rpx; }.filter-empty { padding-top: 130rpx; }
+.reminders-skeleton { display: flex; flex-direction: column; gap: 26rpx; }
+.skeleton-overview { display: flex; flex-direction: column; gap: 16rpx; padding: 24rpx 26rpx; border: 1rpx solid rgba(255,255,255,.72); border-radius: var(--dk-radius-xl, 32rpx); background: var(--dk-surface); box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47,111,106,.07)); }
+.skeleton-card { display: flex; flex-direction: column; justify-content: center; gap: 16rpx; min-height: 154rpx; padding: 24rpx 26rpx; border: 1rpx solid rgba(255,255,255,.65); border-radius: var(--dk-radius-xl, 32rpx); background: var(--dk-surface); box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47,111,106,.07)); }
 .login-btn { width: 230rpx; margin-top: 32rpx; color: #fff; background: var(--dk-brand); border-radius: 999rpx; font-size: 26rpx; }.login-btn::after { border: none; }
 </style>

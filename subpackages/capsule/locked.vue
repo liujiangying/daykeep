@@ -240,17 +240,17 @@ onShow(() => {
 .cover-date-line { height: 1rpx; margin: 0 16rpx; flex: 1 !important; background: rgba(255,255,255,.3); }
 .turn-hint { position: absolute; bottom: calc(52rpx + env(safe-area-inset-bottom)); color: rgba(255,255,255,.6); font-size: 20rpx; letter-spacing: .08em; }
 .letter-page { height: 100%; background: #e9ece9; }
-.letter-sheet { min-height: calc(100vh - 68rpx); margin: 34rpx 28rpx; padding: 68rpx 44rpx calc(100rpx + env(safe-area-inset-bottom)); box-sizing: border-box; border-radius: 8rpx; background: #fcfbf6; box-shadow: 0 16rpx 44rpx rgba(8, 32, 30, .12); }
-.letter-eyebrow { color: #75807a; font-size: 20rpx; letter-spacing: .15em; }
+.letter-sheet { min-height: calc(100vh - 68rpx); margin: 34rpx 28rpx; padding: 68rpx 44rpx calc(100rpx + env(safe-area-inset-bottom)); box-sizing: border-box; border-radius: 8rpx; background: var(--dk-surface, #fcfbf6); box-shadow: var(--dk-shadow-card, 0 16rpx 44rpx rgba(8,32,30,.12)); }
+.letter-eyebrow { color: var(--dk-muted, #75807a); font-size: 20rpx; letter-spacing: .15em; }
 .letter-rule { width: 44rpx; height: 2rpx; margin: 24rpx 0 34rpx; background: var(--dk-brand); }
-.letter-body { display: block; color: #252c2a; font-size: 30rpx; line-height: 2; white-space: pre-wrap; word-break: break-word; }
-.letter-sign { display: flex; align-items: flex-end; margin-top: 62rpx; color: #89918d; font-size: 20rpx; line-height: 1.7; flex-direction: column; }
+.letter-body { display: block; color: var(--dk-ink, #252c2a); font-size: 30rpx; line-height: 2; white-space: pre-wrap; word-break: break-word; }
+.letter-sign { display: flex; align-items: flex-end; margin-top: 62rpx; color: var(--dk-muted, #89918d); font-size: 20rpx; line-height: 1.7; flex-direction: column; }
 .photo-shade { position: absolute; inset: 0; background: rgba(5, 20, 20, .72); backdrop-filter: blur(18px); }
 .photo-main { position: absolute; inset: 70rpx 28rpx 126rpx; width: calc(100% - 56rpx); height: calc(100% - 196rpx); }
 .photo-caption { position: absolute; right: 38rpx; bottom: calc(58rpx + env(safe-area-inset-bottom)); left: 38rpx; display: flex; justify-content: space-between; color: rgba(255,255,255,.72); font-size: 21rpx; }
 .reader-progress { position: absolute; z-index: 4; right: 0; bottom: calc(24rpx + env(safe-area-inset-bottom)); left: 0; display: flex; justify-content: center; gap: 10rpx; pointer-events: none; }
 .progress-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: rgba(255,255,255,.35); transition: width .2s ease; }
-.progress-dot.active { width: 24rpx; border-radius: 999rpx; background: rgba(255,255,255,.92); }
+.progress-dot.active { width: 24rpx; border-radius: var(--dk-radius-pill, 999rpx); background: rgba(255,255,255,.92); }
 .reader-progress.onPaper .progress-dot { background: rgba(47,111,106,.2); }
 .reader-progress.onPaper .progress-dot.active { background: var(--dk-brand); }
 .content { position: relative; display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 44px); padding: 62rpx 42rpx calc(40rpx + env(safe-area-inset-bottom)); box-sizing: border-box; overflow: hidden; flex-direction: column; text-align: center; }

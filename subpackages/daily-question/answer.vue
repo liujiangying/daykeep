@@ -143,9 +143,7 @@ onLoad((query: Record<string, string> = {}) => {
   border-radius: 36rpx;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 250, 240, 0.92));
-  box-shadow:
-    0 22rpx 48rpx rgba(47, 111, 106, 0.08),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 22rpx 48rpx rgba(47,111,106,.08), 0 2rpx 8rpx rgba(28,36,35,.03));
 }
 
 .kicker {
@@ -160,7 +158,7 @@ onLoad((query: Record<string, string> = {}) => {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 20rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   background: rgba(47, 111, 106, 0.1);
 }
 .mark-icon { width: 34rpx; height: 34rpx; }
@@ -197,7 +195,7 @@ onLoad((query: Record<string, string> = {}) => {
   width: 72rpx;
   height: 6rpx;
   margin: 28rpx 0 32rpx;
-  border-radius: 999rpx;
+  border-radius: var(--dk-radius-pill, 999rpx);
   background: rgba(47, 111, 106, 0.35);
 }
 
@@ -260,9 +258,9 @@ onLoad((query: Record<string, string> = {}) => {
   margin-bottom: 14rpx;
   padding: 26rpx 24rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.7);
-  border-radius: 28rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), var(--dk-surface));
-  box-shadow: 0 14rpx 32rpx rgba(47, 111, 106, 0.06);
+  box-shadow: var(--dk-shadow-card, 0 14rpx 32rpx rgba(47,111,106,.06));
 }
 .path-index {
   width: 56rpx;
@@ -288,7 +286,7 @@ onLoad((query: Record<string, string> = {}) => {
   height: 92rpx;
   padding: 0;
   border: 0;
-  border-radius: 999rpx;
+  border-radius: var(--dk-radius-pill, 999rpx);
   color: #fff;
   background: var(--dk-brand);
   font-size: 28rpx;

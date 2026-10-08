@@ -27,13 +27,13 @@ function onChange(ev: any) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24rpx 0;
+  padding: var(--dk-space-3, 24rpx) 0;
   border-bottom: 1rpx solid var(--dk-line);
-  font-size: 28rpx;
+  font-size: var(--dk-fs-body, 28rpx);
   color: var(--dk-ink);
 }
 .switch-row.soft {
-  margin-top: 24rpx;
+  margin-top: var(--dk-space-3, 24rpx);
   border-bottom: none;
   border-top: 1rpx solid var(--dk-line);
 }

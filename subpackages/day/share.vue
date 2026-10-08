@@ -172,12 +172,12 @@ onShareAppMessage(() => ({
   min-height: 100vh;
   box-sizing: border-box;
   padding: 36rpx 30rpx calc(54rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, #f2f4f3 0%, #f9f5ec 100%);
+  background: linear-gradient(180deg, var(--dk-bg, #f2f4f3) 0%, #f9f5ec 100%);
   color: var(--dk-ink, #1c2423);
 }
 .share-hero { max-width: 690rpx; margin: 0 auto; }
 .eyebrow { display: block; margin: 8rpx 0 24rpx; color: var(--dk-brand, #2f6f6a); font-size: 23rpx; font-weight: 700; letter-spacing: 6rpx; }
-.poster { position: relative; height: 860rpx; overflow: hidden; border-radius: 42rpx; background: #cfd8d5; box-shadow: 0 28rpx 70rpx rgba(28, 45, 42, .16); }
+.poster { position: relative; height: 860rpx; overflow: hidden; border-radius: 42rpx; background: #cfd8d5; box-shadow: var(--dk-shadow-card, 0 28rpx 70rpx rgba(28,45,42,.16)); }
 .poster-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .poster-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13, 28, 26, .12), rgba(12, 22, 22, .54)); }
 .poster-copy { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 72rpx 48rpx; color: #fff; text-align: center; }
@@ -187,12 +187,12 @@ onShareAppMessage(() => ({
 .poster-rule { width: 160rpx; height: 2rpx; margin: 48rpx 0 32rpx; background: rgba(255,255,255,.55); }
 .poster-date { font-size: 27rpx; line-height: 1.5; }
 .poster-calendar { margin-top: 14rpx; color: rgba(255,255,255,.78); font-size: 23rpx; }
-.share-copy { display: block; margin: 28rpx 8rpx 0; color: #697773; font-size: 24rpx; line-height: 1.7; text-align: center; }
-.space-card { max-width: 690rpx; margin: 28rpx auto 0; padding: 26rpx 30rpx; border: 1rpx solid rgba(47,111,106,.12); border-radius: 28rpx; background: rgba(255,255,255,.8); }
+.share-copy { display: block; margin: 28rpx 8rpx 0; color: var(--dk-muted, #697773); font-size: 24rpx; line-height: 1.7; text-align: center; }
+.space-card { max-width: 690rpx; margin: 28rpx auto 0; padding: 26rpx 30rpx; border: 1rpx solid rgba(47,111,106,.12); border-radius: var(--dk-radius-lg, 24rpx); background: rgba(255,255,255,.8); }
 .space-kicker,.space-name { display: block; }
-.space-kicker { color: #788682; font-size: 22rpx; }
-.space-name { margin-top: 8rpx; color: #214a45; font-size: 30rpx; font-weight: 720; }
-.primary { width: 100%; max-width: 690rpx; height: 92rpx; margin: 36rpx auto 0; border: 0; border-radius: 999rpx; color: #fff; background: var(--dk-brand, #2f6f6a); font-size: 29rpx; font-weight: 720; line-height: 92rpx; box-shadow: 0 14rpx 32rpx rgba(47,111,106,.18); }
+.space-kicker { color: var(--dk-muted, #788682); font-size: 22rpx; }
+.space-name { margin-top: 8rpx; color: var(--dk-ink, #214a45); font-size: 30rpx; font-weight: 720; }
+.primary { width: 100%; max-width: 690rpx; height: 92rpx; margin: 36rpx auto 0; border: 0; border-radius: var(--dk-radius-pill, 999rpx); color: #fff; background: var(--dk-brand, #2f6f6a); font-size: 29rpx; font-weight: 720; line-height: 92rpx; box-shadow: 0 14rpx 32rpx rgba(47,111,106,.18); }
 .primary::after { border: 0; }
-.state { display: flex; min-height: 70vh; align-items: center; justify-content: center; color: #6f7c78; font-size: 26rpx; }
+.state { display: flex; min-height: 70vh; align-items: center; justify-content: center; color: var(--dk-muted, #6f7c78); font-size: 26rpx; }
 </style>

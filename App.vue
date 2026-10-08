@@ -85,8 +85,8 @@ page {
   font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   font-size: var(--dk-fs-body, 32rpx);
   line-height: 1.55;
-  color: #1c2423;
-  background-color: #f2f4f3;
+  color: var(--dk-ink, #1c2423);
+  background-color: var(--dk-bg, #f2f4f3);
   box-sizing: border-box;
 
   /* 字号阶梯 → CSS 变量，页面可直接用 */
@@ -98,6 +98,29 @@ page {
   --dk-fs-caption: 24rpx;
   --dk-fs-num: 44rpx;
   --dk-fs-hero: 68rpx;
+
+  /* ===== 统一令牌：圆角 / 间距 / 动效（静态，全主题一致）=====
+   * 主题相关令牌（阴影 / 危险色 / 纪念金 / 骨架色）由 services/theme.ts 注入。
+   * 圆角阶梯吸收全站原有 12/14/16/18/20/22/24/30/32 等散乱取值：
+   *   sm 12 标签、输入框、缩略图；md 18 按钮、列表行；lg 24 卡片；xl 32 大卡与弹层；pill 胶囊 */
+  --dk-radius-sm: 12rpx;
+  --dk-radius-md: 18rpx;
+  --dk-radius-lg: 24rpx;
+  --dk-radius-xl: 32rpx;
+  --dk-radius-pill: 999rpx;
+
+  /* 4rpx 基网格间距阶梯：1 元素内微间距 → 6 分区间大留白 */
+  --dk-space-1: 8rpx;
+  --dk-space-2: 16rpx;
+  --dk-space-3: 24rpx;
+  --dk-space-4: 32rpx;
+  --dk-space-5: 48rpx;
+  --dk-space-6: 64rpx;
+
+  /* 动效节奏：按压等即时反馈用 fast，入场/面板过渡用 base；入场统一 ease-out */
+  --dk-motion-fast: 140ms;
+  --dk-motion-base: 240ms;
+  --dk-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 view,
@@ -120,13 +143,14 @@ image {
   margin-left: 0;
   margin-right: 0;
   padding: 0 24rpx;
-  border: 1rpx solid #ead6d3;
-  border-radius: 16rpx;
-  color: #b64d46;
-  background: #fffafa;
+  border: 1rpx solid var(--dk-danger-soft, #ead6d3);
+  border-radius: var(--dk-radius-md, 16rpx);
+  color: var(--dk-danger, #b64d46);
+  background: transparent;
   font-size: var(--dk-fs-meta, 25rpx);
   font-weight: 500;
   line-height: 78rpx;
+  transition: transform var(--dk-motion-fast, 140ms) var(--dk-ease-out), opacity var(--dk-motion-fast, 140ms) var(--dk-ease-out);
 }
 
 .danger-action::after {
@@ -138,8 +162,133 @@ image {
   width: auto;
   height: 52rpx;
   padding: 0 18rpx;
-  border-radius: 999rpx;
+  border-radius: var(--dk-radius-pill, 999rpx);
   font-size: 21rpx;
   line-height: 50rpx;
+}
+
+/* ─────────────── 统一交互基建 ─────────────── */
+
+/* 按压态：可点元素加 hover-class="dk-press" 即获得「物理按压」反馈。
+ * 注意 .dk-press 会覆盖元素自身 transform，依赖 transform 定位的元素
+ * 请改用自带 transition 的基类（.dk-btn 等）或页面内自定义按压样式。 */
+.dk-press {
+  transform: scale(0.97);
+  opacity: 0.75;
+  transition: transform var(--dk-motion-fast, 140ms) var(--dk-ease-out), opacity var(--dk-motion-fast, 140ms) var(--dk-ease-out);
+}
+
+/* 按钮基类：主操作 --primary / 描边 --ghost / 柔和 --soft / 危险 --danger。
+ * 自带 transition，配合 hover-class="dk-press" 按下与回弹都平滑。 */
+.dk-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  margin: 0;
+  padding: 0 var(--dk-space-4, 32rpx);
+  border: 0;
+  border-radius: var(--dk-radius-md, 18rpx);
+  font-size: var(--dk-fs-label, 30rpx);
+  font-weight: 600;
+  line-height: 1;
+  transition: transform var(--dk-motion-fast, 140ms) var(--dk-ease-out), opacity var(--dk-motion-fast, 140ms) var(--dk-ease-out), background-color var(--dk-motion-fast, 140ms) linear;
+}
+
+.dk-btn::after {
+  border: 0;
+}
+
+.dk-btn--primary {
+  background: var(--dk-brand, #2f6f6a);
+  color: #fffeff;
+}
+
+.dk-btn--ghost {
+  border: 1rpx solid var(--dk-line, #e2e6e4);
+  background: transparent;
+  color: var(--dk-ink, #1c2423);
+}
+
+.dk-btn--soft {
+  background: var(--dk-brand-soft, #e4f0ee);
+  color: var(--dk-brand, #2f6f6a);
+}
+
+.dk-btn--danger {
+  background: var(--dk-danger-soft, #f3e5e3);
+  color: var(--dk-danger, #b64d46);
+}
+
+/* 骨架屏：任意 view 加 .dk-skeleton 即获得微光扫过占位；
+ * 结构化骨架用 components/DkSkeleton.vue 组合。 */
+@keyframes dk-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.dk-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--dk-skeleton-bg, #e7ecea);
+}
+
+.dk-skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--dk-skeleton-sheen, rgba(255, 255, 255, 0.65)), transparent);
+  animation: dk-shimmer 1.6s infinite;
+}
+
+/* 入场动效：首屏内容交错淡入上移。用法：
+ * <view class="dk-fade-up" :style="{ animationDelay: `${Math.min(i, 5) * 50}ms` }" /> */
+@keyframes dk-fade-up {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dk-fade-up {
+  animation: dk-fade-up var(--dk-motion-base, 240ms) var(--dk-ease-out) backwards;
+}
+
+/* 遮罩与底部弹层入场：配合 v-if 挂载即播放 */
+@keyframes dk-fade {
+  from { opacity: 0; }
+}
+
+.dk-mask-in {
+  animation: dk-fade var(--dk-motion-fast, 140ms) ease-out backwards;
+}
+
+@keyframes dk-sheet-up {
+  from { transform: translateY(20%); opacity: .7; }
+}
+
+.dk-sheet-up {
+  animation: dk-sheet-up var(--dk-motion-base, 240ms) var(--dk-ease-out) backwards;
+}
+
+/* 底部安全区：固定操作条统一内边距 */
+.dk-safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+}
+
+/* 隐形扩大触控热区：小尺寸可点元素（× 关闭、清除等）加此类，
+ * 视觉不变，命中区域向外扩一圈，对齐 88rpx 触控标准。 */
+.dk-hit {
+  position: relative;
+}
+.dk-hit::before {
+  content: '';
+  position: absolute;
+  top: -16rpx;
+  right: -16rpx;
+  bottom: -16rpx;
+  left: -16rpx;
 }
 </style>

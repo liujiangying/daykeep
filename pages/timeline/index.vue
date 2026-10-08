@@ -7,42 +7,38 @@
           <text class="brand">只我们</text>
         </view>
         <view v-if="loggedIn" class="nav-actions">
-          <button class="v2-chip primary space-chip" @tap="openSpaceSwitcher"><text class="space-chip-label">{{ currentSpaceLabel }}</text><text class="chip-chevron" /></button>
+          <button class="v2-chip primary space-chip" hover-class="dk-press" :hover-stay-time="60" @tap="openSpaceSwitcher"><text class="space-chip-label">{{ currentSpaceLabel }}</text><text class="chip-chevron" /></button>
         </view>
       </view>
     </view>
     <view class="nav-spacer" :style="{ height: navTotalHeight + 'px' }" />
 
-    <view v-if="loggedIn && !currentSpace?.dissolvedAt" class="v2-hero">
+    <view v-if="loggedIn && !currentSpace?.dissolvedAt" class="v2-hero dk-fade-up">
       <view class="composer-card">
         <text class="composer-question">{{ composerQuestion }}</text>
         <view class="composer-actions">
-          <view class="composer-action type-text" @tap="createDiary('text')">
+          <view class="composer-action type-text" hover-class="dk-press" :hover-stay-time="60" @tap="createDiary('text')">
             <image class="composer-icon" src="../../static/composer/text.png" mode="aspectFit" />
             <text>文字</text>
           </view>
-          <view class="composer-action type-photo" @tap="createDiary('photo')">
+          <view class="composer-action type-photo" hover-class="dk-press" :hover-stay-time="60" @tap="createDiary('photo')">
             <image class="composer-icon" src="../../static/composer/photo.png" mode="aspectFit" />
             <text>照片</text>
           </view>
         </view>
         <view class="composer-secondary-actions">
-          <view class="composer-secondary-action" @tap="createCommitment">
-            <view class="secondary-copy">
-              <text class="secondary-title">创建约定</text>
-              <text class="secondary-desc">约好一件未来的事</text>
-            </view>
+          <view class="composer-secondary-action" hover-class="dk-press" :hover-stay-time="60" @tap="createCommitment">
+            <text class="secondary-title">创建约定</text>
+            <text class="secondary-desc">约好一件未来的事</text>
             <text class="secondary-arrow">›</text>
           </view>
-          <view class="composer-secondary-action" @tap="createCapsule">
-            <view class="secondary-copy">
-              <text class="secondary-title">时间胶囊</text>
-              <text class="secondary-desc">把此刻寄给以后</text>
-            </view>
+          <view class="composer-secondary-action" hover-class="dk-press" :hover-stay-time="60" @tap="createCapsule">
+            <text class="secondary-title">时间胶囊</text>
+            <text class="secondary-desc">把此刻寄给以后</text>
             <text class="secondary-arrow">›</text>
           </view>
         </view>
-        <view v-if="dailyQuestion" class="composer-inspiration" @tap="openDailyQuestion">
+        <view v-if="dailyQuestion" class="composer-inspiration" hover-class="dk-press" :hover-stay-time="60" @tap="openDailyQuestion">
           <view class="inspiration-copy">
             <text class="inspiration-label">✦ 今日灵感</text>
             <text class="inspiration-question">{{ dailyQuestion.question }}</text>
@@ -53,12 +49,30 @@
     </view>
 
     <view v-if="!loggedIn" class="empty">
-      <text class="empty-t">登录后查看时间线</text>
-      <button class="btn" @tap="goLogin">去登录</button>
+      <DkEmpty mark="✦" title="登录后查看时间线" desc="只我们，一个只属于你们的地方">
+        <template #action>
+          <button class="btn" hover-class="dk-press" :hover-stay-time="60" @tap="goLogin">去登录</button>
+        </template>
+      </DkEmpty>
     </view>
 
-    <view v-else-if="loading && !scopedList.length" class="empty">
-      <text class="empty-t">加载中…</text>
+    <view v-else-if="loading && !scopedList.length" class="feed-skeleton">
+      <view class="feed-skeleton-card">
+        <DkSkeleton type="rect" h="288rpx" radius="xl" />
+        <view class="feed-skeleton-body">
+          <DkSkeleton type="line" w="58%" h="32rpx" />
+          <DkSkeleton type="line" w="92%" />
+          <DkSkeleton type="line" w="38%" h="22rpx" />
+        </view>
+      </view>
+      <view class="feed-skeleton-card">
+        <view class="feed-skeleton-body">
+          <DkSkeleton type="line" w="64%" h="32rpx" />
+          <DkSkeleton type="line" w="94%" />
+          <DkSkeleton type="line" w="84%" />
+          <DkSkeleton type="line" w="30%" h="22rpx" />
+        </view>
+      </view>
     </view>
 
     <template v-else>
@@ -90,14 +104,14 @@
           </picker>
           <text v-else class="feed-tab" @tap="selectFeedAnchor('upcoming')">{{ feedAnchorLabel('upcoming') }}</text>
         </view>
-        <button class="good-days-entry" @tap="openGoodDays">
+        <button class="good-days-entry" hover-class="dk-press" :hover-stay-time="60" @tap="openGoodDays">
           <view class="calendar-icon" aria-hidden="true" />
           <text>日子与提醒</text>
           <text class="entry-chevron">›</text>
         </button>
       </view>
 
-      <view v-if="currentSpace?.dissolvedAt" class="circle-card dissolved-circle" @tap="openSpaceDetail">
+      <view v-if="currentSpace?.dissolvedAt" class="circle-card dissolved-circle" hover-class="dk-press" :hover-stay-time="60" @tap="openSpaceDetail">
         <view class="dissolved-circle-mark">已解除</view>
         <text class="circle-title">{{ currentSpace.name }}</text>
         <text class="dissolved-circle-title">{{ currentDissolutionText.title }}</text>
@@ -105,9 +119,9 @@
         <text class="circle-detail dissolved-circle-detail">查看详情 ›</text>
       </view>
 
-      <view v-else-if="currentSpace && feedAnchor === 'past'" class="circle-card" @tap="openSpaceDetail">
+      <view v-else-if="currentSpace && feedAnchor === 'past'" class="circle-card" hover-class="dk-press" :hover-stay-time="60" @tap="openSpaceDetail">
         <view v-if="currentSpace.coverUrl" class="circle-cover">
-          <image class="circle-cover-subject" :src="currentSpace.coverUrl" mode="aspectFill" />
+          <DkImg class="circle-cover-subject" :src="currentSpace.coverUrl" />
         </view>
         <view v-if="currentSpace.members?.length" class="circle-members">
           <view v-for="member in currentSpace.members.slice(0, 3)" :key="member.id" class="circle-member">
@@ -132,28 +146,26 @@
           <text v-for="tag in currentSpace.keywords" :key="tag" class="circle-tag">#{{ tag }}</text>
         </view>
         <view class="circle-actions">
-          <button @tap.stop="createCommitment">发起约定</button>
-          <button @tap.stop="openQuiz">默契测试</button>
-          <button @tap.stop="showWeeklyReview">本周回顾</button>
+          <button hover-class="dk-press" :hover-stay-time="60" @tap.stop="createCommitment">发起约定</button>
+          <button hover-class="dk-press" :hover-stay-time="60" @tap.stop="openQuiz">默契测试</button>
+          <button hover-class="dk-press" :hover-stay-time="60" @tap.stop="showWeeklyReview">本周回顾</button>
         </view>
       </view>
 
       <view v-if="!currentSpace?.dissolvedAt && !visibleFeedItems.length" class="empty empty-filter">
-        <template v-if="currentSpace">
-          <view class="space-empty-mark"><text>✦</text></view>
-          <text class="empty-msg">{{ spaceEmptyTitle }}</text>
-          <text v-if="spaceEmptyDesc" class="empty-msg-sub">{{ spaceEmptyDesc }}</text>
-          <button class="space-empty-action" @tap="runSpaceEmptyAction">{{ feedAnchor === 'upcoming' ? '发起一个约定' : '写下共同回忆' }}</button>
-        </template>
+        <DkEmpty v-if="currentSpace" mark="✦" compact :title="spaceEmptyTitle" :desc="spaceEmptyDesc">
+          <template #action>
+            <button class="space-empty-action" hover-class="dk-press" :hover-stay-time="60" @tap="runSpaceEmptyAction">{{ feedAnchor === 'upcoming' ? '发起一个约定' : '写下共同回忆' }}</button>
+          </template>
+        </DkEmpty>
         <template v-else>
-          <text class="empty-msg">{{ personalEmptyTitle }}</text>
-          <text class="empty-msg-sub">{{ personalEmptyDesc }}</text>
+          <DkEmpty mark="✎" :title="personalEmptyTitle" :desc="personalEmptyDesc" />
           <view v-if="!scopedList.length" class="empty-guides">
-            <view class="empty-guide-card" @tap="createAnniversary">
+            <view class="empty-guide-card" hover-class="dk-press" :hover-stay-time="60" @tap="createAnniversary">
               <view><text class="empty-guide-title">记录第一个纪念日</text><text class="empty-guide-desc">生日、相遇、搬家都可以</text></view>
               <text class="empty-guide-go">开始</text>
             </view>
-            <view class="empty-guide-card" @tap="inviteToRecord">
+            <view class="empty-guide-card" hover-class="dk-press" :hover-stay-time="60" @tap="inviteToRecord">
               <view><text class="empty-guide-title">邀请一个人一起记录</text><text class="empty-guide-desc">发给最在乎的那个人</text></view>
               <text class="empty-guide-go">邀请</text>
             </view>
@@ -162,13 +174,16 @@
       </view>
 
       <view v-else-if="!currentSpace?.dissolvedAt" class="feed-list">
-        <view v-for="group in groupedFeedItems" :key="group.month" class="feed-month">
+        <view v-for="(group, gi) in groupedFeedItems" :key="group.month" class="feed-month">
           <view class="month-heading"><text></text><text>{{ group.label }}</text><text></text></view>
           <view
-            v-for="item in group.items"
+            v-for="(item, idx) in group.items"
             :key="item.id"
             class="feed-card"
-            :class="[`kind-${item.kind}`, { locked: item.locked }]"
+            :class="[`kind-${item.kind}`, { locked: item.locked, 'dk-fade-up': gi < 2 && idx < 5 }]"
+            :style="gi < 2 && idx < 5 ? { animationDelay: `${(gi * 5 + idx) * 45}ms` } : undefined"
+            hover-class="dk-press"
+            :hover-stay-time="60"
             @tap="openFeedItem(item)"
           >
             <view v-if="item.kind === 'diary' && item.cover" class="memory-cover" :style="{ backgroundImage: `url(${item.cover})` }" />
@@ -177,6 +192,8 @@
               v-if="item.toggleable"
               class="feed-check"
               :class="{ on: item.done }"
+              hover-class="dk-press"
+              :hover-stay-time="60"
               @tap.stop="onToggleTodo(item.entry)"
             >{{ item.done ? '✓' : '' }}</view>
             <view v-if="item.locked" class="capsule-seal">封</view>
@@ -201,25 +218,25 @@
       </view>
     </template>
 
-    <view v-if="showSpaceSwitcher" class="space-switcher-mask" @tap="showSpaceSwitcher = false">
-      <view class="space-switcher-sheet" @tap.stop>
+    <view v-if="showSpaceSwitcher" class="space-switcher-mask dk-mask-in" @tap="showSpaceSwitcher = false">
+      <view class="space-switcher-sheet dk-sheet-up" @tap.stop>
         <view class="space-switcher-grabber" />
         <view class="space-switcher-head">
           <view class="space-switcher-heading">
             <text class="space-switcher-title">切换空间</text>
           </view>
-          <text class="space-switcher-close" @tap="showSpaceSwitcher = false">×</text>
+          <view class="space-switcher-close dk-hit" hover-class="dk-press" :hover-stay-time="60" @tap="showSpaceSwitcher = false">×</view>
         </view>
         <scroll-view scroll-y :show-scrollbar="false" class="space-switcher-list" :style="spaceSwitcherListStyle">
-          <view class="space-option" :class="{ on: !currentSpaceId }" @tap="selectTimelineSpace(null)">
-            <view class="space-option-mark personal"><image v-if="currentUserAvatar" :src="currentUserAvatar" mode="aspectFill" /><text v-else>我</text></view>
+          <view class="space-option" :class="{ on: !currentSpaceId }" hover-class="dk-press" :hover-stay-time="60" @tap="selectTimelineSpace(null)">
+            <view class="space-option-mark personal"><DkImg v-if="currentUserAvatar" :src="currentUserAvatar" /><text v-else>我</text></view>
             <view class="space-option-copy">
               <text class="space-option-title">仅自己</text>
             </view>
             <view v-if="!currentSpaceId" class="space-option-check"><text>✓</text></view>
           </view>
-          <view v-for="item in spaces" :key="item.id" class="space-option" :class="{ on: currentSpaceId === item.id, dissolved: !!item.dissolvedAt }" @tap="selectTimelineSpace(item.id)">
-            <view class="space-option-mark"><image v-if="item.coverUrl" :src="item.coverUrl" mode="aspectFill" /><text v-else>{{ item.name.slice(0, 1) || '圈' }}</text></view>
+          <view v-for="item in spaces" :key="item.id" class="space-option" :class="{ on: currentSpaceId === item.id, dissolved: !!item.dissolvedAt }" hover-class="dk-press" :hover-stay-time="60" @tap="selectTimelineSpace(item.id)">
+            <view class="space-option-mark"><DkImg v-if="item.coverUrl" :src="item.coverUrl" /><text v-else>{{ item.name.slice(0, 1) || '圈' }}</text></view>
             <view class="space-option-copy">
               <view class="space-option-title-row">
                 <text class="space-option-title">{{ item.name }}</text>
@@ -231,17 +248,17 @@
           </view>
         </scroll-view>
         <view class="space-switcher-actions">
-          <view v-if="officialExperience && !hasJoinedOfficial" class="space-manage-action official-join-action" @tap="joinOfficialFromSwitcher">
+          <view v-if="officialExperience && !hasJoinedOfficial" class="space-manage-action official-join-action" hover-class="dk-press" :hover-stay-time="60" @tap="joinOfficialFromSwitcher">
             <text class="space-manage-mark">✦</text>
             <text class="space-manage-title">加入官方体验圈</text>
             <text class="space-manage-arrow">›</text>
           </view>
-          <view v-if="!currentSpace || (!currentSpace.isOfficial && isCurrentSpaceOwner && !currentSpace.dissolvedAt)" class="space-manage-action" @tap="inviteFromSpaceSwitcher">
+          <view v-if="!currentSpace || (!currentSpace.isOfficial && isCurrentSpaceOwner && !currentSpace.dissolvedAt)" class="space-manage-action" hover-class="dk-press" :hover-stay-time="60" @tap="inviteFromSpaceSwitcher">
             <text class="space-manage-mark">＋</text>
             <text class="space-manage-title">{{ currentSpace ? '邀请成员加入' : '邀请一起记' }}</text>
             <text class="space-manage-arrow">›</text>
           </view>
-          <view class="space-manage-action" @tap="createGroupFromSpaceSwitcher">
+          <view class="space-manage-action" hover-class="dk-press" :hover-stay-time="60" @tap="createGroupFromSpaceSwitcher">
             <text class="space-manage-mark">＋</text>
             <text class="space-manage-title">创建多人空间</text>
             <text class="space-manage-arrow">›</text>
@@ -255,7 +272,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { onShow, onBackPress, onShareAppMessage } from '@dcloudio/uni-app'
+import DkEmpty from '@/components/DkEmpty.vue'
+import DkSkeleton from '@/components/DkSkeleton.vue'
+import DkImg from '@/components/DkImg.vue'
+import { onShow, onBackPress, onShareAppMessage, onPullDownRefresh } from '@dcloudio/uni-app'
 import { fetchMe, getCachedUserId, isLoggedIn, isSessionBoundaryError, isTransientAccessError, logout } from '@/services/auth'
 import {
   entryBackgroundUrl,
@@ -1006,6 +1026,8 @@ async function onToggleTodo(item: Entry) {
   try {
     const updated = await toggleTodoDone(snapshot)
     entriesStore.optimisticUpdate(updated.id, updated)
+    // 完成事项是给到确定感的正向动作，配一次轻振动
+    if (nextStatus === 'done') uni.vibrateShort({ type: 'light' })
   } catch (e: any) {
     entriesStore.optimisticUpdate(snapshot.id, snapshot)
     uni.showToast({ title: e?.message || '操作失败', icon: 'none' })
@@ -1092,6 +1114,20 @@ onShow(() => {
   }
 })
 
+// 下拉刷新：强制重拉当前视图数据，完成后收起刷新动画。
+onPullDownRefresh(async () => {
+  try {
+    if (loggedIn.value) {
+      await loadSpaces(true)
+      await Promise.all([load(true), loadDailyQuestion()])
+    } else {
+      await load(true)
+    }
+  } finally {
+    uni.stopPullDownRefresh()
+  }
+})
+
 
 // #ifdef APP-PLUS
 let lastBackTime = 0
@@ -1116,31 +1152,6 @@ onBackPress(() => {
   color: var(--dk-ink, #1c2423);
   box-sizing: border-box;
 }
-.collab-badge {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 8rpx;
-}
-.collab-tiny-avatar {
-  width: 32rpx;
-  height: 32rpx;
-  box-sizing: border-box;
-  margin-left: -7rpx;
-  border: 2rpx solid var(--dk-bg, #f2f4f3);
-  border-radius: 50%;
-}
-.collab-tiny-avatar:first-child {
-  margin-left: 0;
-}
-.collab-tiny-dot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: var(--dk-feature-brand, #2f6f6a);
-  font-size: 17rpx;
-}
-
 .nav {
   position: fixed;
   top: 0;
@@ -1181,82 +1192,6 @@ onBackPress(() => {
   transform: translate(-50%, -50%);
 }
 
-.clock-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 28rpx;
-  padding: 12rpx 0 8rpx;
-}
-
-.clock-date {
-  font-size: var(--dk-fs-label, 26rpx);
-  color: var(--dk-muted, #6b736f);
-  margin-bottom: 24rpx;
-  letter-spacing: 0.04em;
-}
-
-.flip-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
-
-.digit {
-  margin: 0 8rpx;
-}
-
-.digit-face {
-  position: relative;
-  width: 100rpx;
-  height: 132rpx;
-  border-radius: 16rpx;
-  background: linear-gradient(180deg, #3a3a3c 0%, #1c1c1e 48%, #2c2c2e 52%, #141416 100%);
-  box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.digit-text {
-  font-size: var(--dk-fs-hero, 64rpx);
-  font-weight: 500;
-  color: #f2f2f0;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.digit-seam {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2rpx;
-  margin-top: -1rpx;
-  background: rgba(0, 0, 0, 0.45);
-  box-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.06);
-}
-
-.colon {
-  width: 28rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18rpx;
-  padding: 0 4rpx;
-}
-
-.dot {
-  width: 10rpx;
-  height: 10rpx;
-  border-radius: 50%;
-  background: var(--dk-ink, #1c2423);
-  opacity: 0.55;
-}
-
 .v2-hero {
   margin: 24rpx 0 26rpx;
 }
@@ -1292,13 +1227,11 @@ onBackPress(() => {
 .composer-card {
   padding: 32rpx 28rpx 26rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.72);
-  border-radius: 32rpx;
+  border-radius: var(--dk-radius-xl, 32rpx);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 254, 251, 0.08) 42%),
-    #fffefb;
-  box-shadow:
-    0 22rpx 48rpx rgba(47, 111, 106, 0.08),
-    0 2rpx 10rpx rgba(28, 36, 35, 0.04);
+    var(--dk-surface, #fffefb);
+  box-shadow: var(--dk-shadow-card, 0 22rpx 48rpx rgba(47, 111, 106, 0.08));
 }
 
 .composer-question {
@@ -1323,7 +1256,7 @@ onBackPress(() => {
   align-items: center;
   justify-content: center;
   gap: 8rpx;
-  border-radius: 22rpx;
+  border-radius: var(--dk-radius-lg, 24rpx);
   background: var(--dk-bg-soft, #eef2f1);
   color: var(--dk-ink, #1c2423);
   font-size: var(--dk-fs-meta, 24rpx);
@@ -1337,13 +1270,13 @@ onBackPress(() => {
   width: 42rpx;
   height: 42rpx;
 }
-.composer-secondary-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14rpx;margin-top:14rpx}.composer-secondary-action{display:flex;min-width:0;height:88rpx;align-items:center;gap:10rpx;padding:0 18rpx;border:1rpx solid rgba(47,111,106,.08);border-radius:20rpx;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(47,111,106,.05));box-sizing:border-box;box-shadow:inset 0 1rpx 0 rgba(255,255,255,.7)}.secondary-copy{min-width:0;flex:1}.secondary-title,.secondary-desc{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.secondary-title{color:var(--dk-ink);font-size:var(--dk-fs-meta,25rpx);font-weight:680}.secondary-desc{margin-top:5rpx;color:var(--dk-muted);font-size:var(--dk-fs-caption,23rpx)}.secondary-arrow{flex-shrink:0;color:var(--dk-brand);font-size:27rpx;line-height:1}
+.composer-secondary-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12rpx;margin-top:12rpx}.composer-secondary-action{display:flex;min-width:0;height:64rpx;align-items:center;gap:8rpx;padding:0 18rpx;border:1rpx solid var(--dk-line);border-radius:var(--dk-radius-lg,24rpx);background:transparent;box-sizing:border-box}.secondary-title{flex-shrink:0;color:var(--dk-ink);font-size:var(--dk-fs-meta,24rpx);font-weight:680}.secondary-desc{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dk-muted);font-size:var(--dk-fs-caption,22rpx)}.secondary-arrow{flex-shrink:0;color:var(--dk-brand);font-size:26rpx;line-height:1}
 .composer-inspiration{display:flex;align-items:center;gap:18rpx;margin-top:24rpx;padding-top:22rpx;border-top:1rpx solid rgba(47,111,106,.1)}
 .inspiration-copy{flex:1;min-width:0}.inspiration-label{display:block;color:var(--dk-feature-brand,#2f6f6a);font-size:var(--dk-fs-caption,23rpx);font-weight:750}.inspiration-question{display:-webkit-box;margin-top:7rpx;overflow:hidden;color:var(--dk-ink);font-size:var(--dk-fs-meta,25rpx);font-weight:680;line-height:1.42;-webkit-box-orient:vertical;-webkit-line-clamp:2}.inspiration-action{flex:0 0 auto;color:var(--dk-feature-brand,#2f6f6a);font-size:var(--dk-fs-caption,23rpx);font-weight:750;white-space:nowrap}
-.daily-reveal{margin-top:14rpx;padding:22rpx 26rpx;border:1rpx solid var(--dk-line);border-radius:24rpx;background:var(--dk-surface)}.daily-reveal-label{display:block;color:var(--dk-brand);font-size:21rpx;font-weight:700}.daily-reveal-question{display:block;margin:7rpx 0 12rpx;color:var(--dk-ink);font-size:25rpx;font-weight:650}.daily-reveal-row{display:grid;grid-template-columns:120rpx 1fr;gap:14rpx;padding:8rpx 0;color:var(--dk-muted);font-size:22rpx}.daily-reveal-row text:last-child{color:var(--dk-ink)}
+.daily-reveal{margin-top:14rpx;padding:22rpx 26rpx;border:1rpx solid var(--dk-line);border-radius:var(--dk-radius-lg,24rpx);background:var(--dk-surface)}.daily-reveal-label{display:block;color:var(--dk-brand);font-size:21rpx;font-weight:700}.daily-reveal-question{display:block;margin:7rpx 0 12rpx;color:var(--dk-ink);font-size:25rpx;font-weight:650}.daily-reveal-row{display:grid;grid-template-columns:120rpx 1fr;gap:14rpx;padding:8rpx 0;color:var(--dk-muted);font-size:22rpx}.daily-reveal-row text:last-child{color:var(--dk-ink)}
 
 .empty-guides { width: 100%; margin-top: 28rpx; }
-.empty-guide-card { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-top: 14rpx; padding: 24rpx; border: 1rpx solid var(--dk-line); border-radius: 22rpx; background: var(--dk-surface); text-align: left; }
+.empty-guide-card { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-top: 14rpx; padding: 24rpx; border: 1rpx solid var(--dk-line); border-radius: var(--dk-radius-lg, 24rpx); background: var(--dk-surface); text-align: left; }
 .empty-guide-title { display: block; color: var(--dk-ink); font-size: var(--dk-fs-label, 28rpx); font-weight: 700; }
 .empty-guide-desc { display: block; margin-top: 6rpx; color: var(--dk-muted); font-size: var(--dk-fs-caption, 23rpx); }
 .empty-guide-go { flex-shrink: 0; color: var(--dk-brand); font-size: var(--dk-fs-meta, 25rpx); font-weight: 700; }
@@ -1359,13 +1292,13 @@ onBackPress(() => {
   padding: 28rpx;
   overflow: hidden;
   border: 1rpx solid rgba(47,111,106,.09);
-  border-radius: 30rpx;
-  background: radial-gradient(circle at 100% 0,rgba(206,232,226,.5),transparent 38%),rgba(255,254,251,.96);
-  box-shadow: 0 14rpx 40rpx rgba(24,42,39,.055);
+  border-radius: var(--dk-radius-xl, 32rpx);
+  background: radial-gradient(circle at 100% 0,rgba(206,232,226,.5),transparent 38%),var(--dk-surface, rgba(255,254,251,.96));
+  box-shadow: var(--dk-shadow-card, 0 14rpx 40rpx rgba(24,42,39,.055));
 }
 .dissolved-circle{position:relative;padding:34rpx 30rpx;background:linear-gradient(145deg,rgba(255,254,251,.96),rgba(243,239,234,.96));text-align:left}
-.dissolved-circle-mark{display:inline-flex;padding:7rpx 14rpx;border-radius:999rpx;color:#a85f57;background:rgba(178,103,93,.1);font-size:21rpx;font-weight:700}
-.dissolved-circle .circle-title{margin-top:18rpx}.dissolved-circle-title{display:block;margin-top:20rpx;color:var(--dk-ink);font-size:27rpx;font-weight:700;line-height:1.5}.dissolved-circle-desc{display:block;margin-top:6rpx;color:#a85f57;font-size:23rpx}.dissolved-circle-detail{display:block;margin-top:24rpx;text-align:right}
+.dissolved-circle-mark{display:inline-flex;padding:7rpx 14rpx;border-radius:999rpx;color:var(--dk-danger,#a85f57);background:var(--dk-danger-soft,rgba(178,103,93,.1));font-size:21rpx;font-weight:700}
+.dissolved-circle .circle-title{margin-top:18rpx}.dissolved-circle-title{display:block;margin-top:20rpx;color:var(--dk-ink);font-size:27rpx;font-weight:700;line-height:1.5}.dissolved-circle-desc{display:block;margin-top:6rpx;color:var(--dk-danger,#a85f57);font-size:23rpx}.dissolved-circle-detail{display:block;margin-top:24rpx;text-align:right}
 .circle-cover { position:relative;width:calc(100% + 56rpx);height:300rpx;margin:-28rpx -28rpx 24rpx;overflow:hidden;background:var(--dk-brand-soft); }
 .circle-cover-subject{display:block;width:100%;height:100%}
 
@@ -1544,6 +1477,10 @@ onBackPress(() => {
   gap: 28rpx;
 }
 
+.feed-skeleton { display: flex; flex-direction: column; gap: 28rpx; }
+.feed-skeleton-card { overflow: hidden; border: 1rpx solid rgba(255,255,255,.65); border-radius: var(--dk-radius-xl, 32rpx); background: var(--dk-surface, #fff); box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47,111,106,.07)); }
+.feed-skeleton-body { display: flex; flex-direction: column; gap: 18rpx; padding: 28rpx; }
+
 .feed-month { display: flex; flex-direction: column; gap: 20rpx; }
 .month-heading { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12rpx; margin: 10rpx 0 2rpx; color: var(--dk-muted); font-size: var(--dk-fs-meta, 25rpx); font-weight: 700; }
 .month-heading text:first-child,.month-heading text:last-child { height: 1rpx; background: var(--dk-line,#d6dedc); }
@@ -1553,17 +1490,12 @@ onBackPress(() => {
   min-height: 150rpx;
   overflow: hidden;
   border: 1rpx solid rgba(255, 255, 255, 0.65);
-  border-radius: 32rpx;
+  border-radius: var(--dk-radius-xl, 32rpx);
   background: var(--dk-surface, #fff);
-  box-shadow:
-    0 16rpx 36rpx rgba(47, 111, 106, 0.07),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
-  &:active {
-    opacity: 0.78;
-  }
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07));
   &.kind-capsule.locked {
     min-height: 300rpx;
-    color: #f4e7c4;
+    color: var(--dk-gold-soft, #f4e7c4);
     border-color: rgba(244, 231, 196, 0.12);
     background: radial-gradient(circle at 72% 20%,rgba(226,194,123,.16),transparent 34%),linear-gradient(145deg, #17332e, #091815);
   }
@@ -1598,7 +1530,7 @@ onBackPress(() => {
 .memory-cover .feed-kind { color: #fff; background: rgba(36,66,61,.58); backdrop-filter: blur(8rpx); }
 
 .feed-card.locked .feed-kind {
-  color: #f4e7c4;
+  color: var(--dk-gold-soft, #f4e7c4);
   background: rgba(255,255,255,.12);
 }
 
@@ -1644,7 +1576,7 @@ onBackPress(() => {
 }
 
 .feed-card.locked .feed-title {
-  color: #f4e7c4;
+  color: var(--dk-gold-soft, #f4e7c4);
 }
 
 .feed-desc {
@@ -1691,56 +1623,9 @@ onBackPress(() => {
   justify-content: center;
   border: 1rpx solid rgba(244, 231, 196, .28);
   border-radius: 50%;
-  color: #f4e7c4;
+  color: var(--dk-gold-soft, #f4e7c4);
   font-size: 34rpx;
   font-weight: 800;
-}
-
-.page-switch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
-}
-
-.ps {
-  font-size: var(--dk-fs-label, 26rpx);
-  color: #a3aaa7;
-  letter-spacing: 0.04em;
-  &.on {
-    color: var(--dk-ink, #1c2423);
-    font-weight: 600;
-    font-size: var(--dk-fs-title, 30rpx);
-  }
-}
-
-.ps-sep {
-  font-size: var(--dk-fs-meta, 24rpx);
-  color: #c8cecb;
-}
-
-.sub-tabs {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  margin-bottom: 20rpx;
-}
-
-.st {
-  font-size: var(--dk-fs-meta, 24rpx);
-  color: #b0b6b3;
-  letter-spacing: 0.04em;
-  &.on {
-    color: var(--dk-ink, #1c2423);
-    font-weight: 500;
-  }
-}
-
-.st-sep {
-  font-size: var(--dk-fs-caption, 22rpx);
-  color: #d0d5d2;
 }
 
 .empty {
@@ -1753,39 +1638,9 @@ onBackPress(() => {
 }
 .circle-card + .empty-filter,
 .circle-card + .feed-list { margin-top: 0; }
-.space-empty-mark { display: flex; width: 70rpx; height: 70rpx; margin: 0 auto 22rpx; align-items: center; justify-content: center; border-radius: 50%; color: var(--dk-brand); background: var(--dk-brand-soft); font-size: 30rpx; }
 .circle-card ~ .empty-filter { margin-top: -6rpx; padding: 44rpx 30rpx 52rpx; border: 1rpx dashed rgba(47,111,106,.16); border-radius: 28rpx; background: rgba(255,255,255,.42); }
 .space-empty-action { display: inline-flex; height: 68rpx; margin: 28rpx auto 0; padding: 0 30rpx; align-items: center; justify-content: center; border: 0; border-radius: 999rpx; color: #fff; background: var(--dk-brand); font-size: 24rpx; font-weight: 700; line-height: 68rpx; }
 .space-empty-action::after { border: 0; }
-
-.empty-msg {
-  display: block;
-  text-align: center;
-  font-size: var(--dk-fs-body, 28rpx);
-  color: var(--dk-ink, #1c2423);
-  letter-spacing: 0.02em;
-}
-
-.empty-msg-sub {
-  display: block;
-  margin-top: 12rpx;
-  text-align: center;
-  font-size: var(--dk-fs-meta, 24rpx);
-  color: var(--dk-muted, #6b736f);
-}
-
-.empty-t {
-  display: block;
-  font-size: var(--dk-fs-title, 30rpx);
-  color: var(--dk-ink, #1c2423);
-}
-
-.empty-s {
-  display: block;
-  margin-top: 12rpx;
-  font-size: var(--dk-fs-meta, 24rpx);
-  color: var(--dk-muted, #6b736f);
-}
 
 .btn {
   margin-top: 28rpx;
@@ -1798,7 +1653,7 @@ onBackPress(() => {
   font-size: var(--dk-fs-body, 28rpx);
   color: #fff;
   background: var(--dk-brand, #2f6f6a);
-  border-radius: 12rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   border: none;
   &::after {
     border: none;
@@ -1809,231 +1664,6 @@ onBackPress(() => {
     background: transparent;
     border: 1rpx solid var(--dk-brand, #2f6f6a);
   }
-}
-
-.list {
-  margin-top: 8rpx;
-}
-
-/* —— 待办：备忘录式 —— */
-.todo-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 16rpx;
-  padding: 22rpx 0;
-  border-bottom: 1rpx solid var(--dk-line, #e2e6e4);
-  &.done {
-    opacity: 0.55;
-  }
-}
-.cd-row.with-bg {
-  margin-bottom: 20rpx;
-  padding: 36rpx 28rpx;
-  overflow: hidden;
-  border: none;
-  border-radius: 22rpx;
-  background-size: cover;
-  background-position: center;
-  box-shadow: 0 16rpx 40rpx rgba(24, 28, 32, 0.08);
-}
-.cd-row.dim {
-  opacity: 0.55;
-}
-
-.cd-row.done {
-  opacity: 0.45;
-}
-
-.todo-check {
-  flex-shrink: 0;
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 50%;
-  border: 2rpx solid var(--dk-line, #c5ccc9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  &.on {
-    border-color: var(--dk-brand, #2f6f6a);
-    background: var(--dk-brand, #2f6f6a);
-  }
-}
-
-.todo-check-mark {
-  font-size: 18rpx;
-  color: #fff;
-  line-height: 1;
-}
-
-.todo-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.todo-corner {
-  display: block;
-  margin-bottom: 6rpx;
-  font-size: var(--dk-fs-caption, 22rpx);
-  line-height: 1.2;
-  letter-spacing: 0.04em;
-  &.is-overdue {
-    color: #b42318;
-  }
-  &.is-today {
-    color: var(--dk-brand, #2f6f6a);
-  }
-  &.is-done {
-    color: var(--dk-muted, #6b736f);
-  }
-}
-
-.todo-title {
-  display: block;
-  font-size: var(--dk-fs-label, 26rpx);
-  line-height: 1.55;
-  color: var(--dk-ink, #1c2423);
-  white-space: normal;
-  word-break: break-word;
-}
-
-.todo-date {
-  display: block;
-  margin-top: 6rpx;
-  font-size: var(--dk-fs-caption, 22rpx);
-  line-height: 1.3;
-  color: var(--dk-muted, #6b736f);
-  font-variant-numeric: tabular-nums;
-}
-
-.cd-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 20rpx;
-  padding: 26rpx 0;
-  border-bottom: 1rpx solid var(--dk-line, #e2e6e4);
-}
-
-
-.cd-row.dim {
-  opacity: 0.55;
-}
-
-.cd-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 10rpx;
-  min-width: 0;
-}
-
-.pin {
-  flex-shrink: 0;
-  font-size: var(--dk-fs-caption, 22rpx);
-  color: var(--dk-brand, #2f6f6a);
-  letter-spacing: 0.06em;
-}
-
-.cd-title {
-  flex: 0 1 auto;
-  max-width: 70%;
-  min-width: 0;
-  font-size: var(--dk-fs-title, 30rpx);
-  font-weight: 500;
-  color: var(--dk-ink, #1c2423);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  &.strike {
-    text-decoration: line-through;
-  }
-}
-
-.cd-verb {
-  flex-shrink: 0;
-  font-size: var(--dk-fs-meta, 24rpx);
-  color: var(--dk-muted, #6b736f);
-  &.overdue {
-    color: #b42318;
-  }
-}
-
-.cd-meta {
-  display: block;
-  margin-top: 8rpx;
-  font-size: var(--dk-fs-meta, 24rpx);
-  color: var(--dk-muted, #6b736f);
-}
-
-.cd-tail {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  justify-content: flex-end;
-  min-width: 132rpx;
-  padding-left: 16rpx;
-}
-
-.cd-countdown {
-  font-size: var(--dk-fs-body, 28rpx);
-  font-weight: 650;
-  line-height: 1.2;
-  color: var(--dk-ink, #1c2423);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.cd-tail.soon .cd-countdown,
-.cd-tail.today .cd-countdown {
-  color: var(--dk-accent, #2f6f6a);
-}
-.cd-tail.past .cd-countdown {
-  color: var(--dk-muted, #6b736f);
-  font-weight: 500;
-}
-
-.cd-num {
-  font-size: var(--dk-fs-num, 40rpx);
-  font-weight: 600;
-  line-height: 1;
-  color: var(--dk-ink, #1c2423);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-
-.cd-unit {
-  font-size: var(--dk-fs-caption, 22rpx);
-  color: var(--dk-muted, #6b736f);
-  line-height: 1;
-  padding-bottom: 2rpx;
-}
-
-.cd-special {
-  font-size: var(--dk-fs-body, 28rpx);
-  font-weight: 600;
-  color: var(--dk-ink, #1c2423);
-  letter-spacing: 0.04em;
-}
-
-.cd-tail.soon .cd-num,
-.cd-tail.today .cd-special {
-  color: var(--dk-accent, #2f6f6a);
-}
-
-.cd-tail.overdue .cd-num,
-.cd-tail.overdue .cd-special {
-  color: #b42318;
-}
-
-.cd-tail.past .cd-num {
-  color: var(--dk-muted, #6b736f);
-  font-weight: 500;
 }
 
 </style>

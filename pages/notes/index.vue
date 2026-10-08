@@ -8,38 +8,57 @@
     </view>
     <view class="nav-spacer" :style="{ height: navTotalHeight + 'px' }" />
 
-    <view v-if="!loggedIn" class="empty login-empty">
-      <text class="login-empty-copy">登录后开始写随手记</text>
-      <button class="btn" @tap="goLogin">去登录</button>
+    <view v-if="!loggedIn" class="empty-wrap login-empty">
+      <DkEmpty mark="✎" title="登录后开始写随手记" desc="把想说的、想留的，都放在这里">
+        <template #action>
+          <button class="btn" hover-class="dk-press" :hover-stay-time="60" @tap="goLogin">去登录</button>
+        </template>
+      </DkEmpty>
     </view>
 
     <template v-else>
       <view v-if="loading && !entriesStore.list.length" class="empty-wrap">
-        <text class="empty-t">加载中…</text>
+        <view class="notes-skeleton">
+          <view v-for="n in 3" :key="n" class="notes-skeleton-card">
+            <DkSkeleton v-if="n === 1" type="rect" h="128rpx" w="128rpx" radius="sm" />
+            <view class="notes-skeleton-main">
+              <DkSkeleton type="line" w="88%" />
+              <DkSkeleton type="line" w="62%" h="24rpx" />
+              <DkSkeleton type="line" w="36%" h="22rpx" />
+            </view>
+          </view>
+        </view>
       </view>
 
       <view v-else-if="!list.length" class="empty-wrap">
-        <text class="empty-t">还没有随手记</text>
-        <button class="calendar-empty-entry" @tap="openCalendar">打开回忆日历</button>
+        <DkEmpty mark="✎" title="还没有随手记" desc="从一句话开始，往后的日子都有回音">
+          <template #action>
+            <button class="calendar-empty-entry" hover-class="dk-press" :hover-stay-time="60" @tap="openCalendar">打开回忆日历</button>
+          </template>
+        </DkEmpty>
       </view>
 
       <template v-else>
         <view class="filter-row">
           <scroll-view class="filters" scroll-x :show-scrollbar="false">
             <view class="filter-inner">
-              <text
+              <view
                 v-for="item in filterOptions"
                 :key="item.value"
                 class="filter"
                 :class="{ on: filter === item.value }"
+                hover-class="dk-press"
+                :hover-stay-time="60"
                 @tap="filter = item.value"
-              >{{ item.label }}</text>
+              >{{ item.label }}</view>
             </view>
           </scroll-view>
           <button
             class="search-entry"
             :class="{ on: searchOpen }"
             aria-label="搜索随手记"
+            hover-class="dk-press"
+            :hover-stay-time="60"
             @tap="toggleSearch"
           >
             <view class="search-glyph" />
@@ -56,12 +75,12 @@
               :focus="searchOpen"
               confirm-type="search"
             />
-            <text v-if="searchQuery" class="search-clear" @tap.stop="clearSearch">×</text>
+            <view v-if="searchQuery" class="search-clear dk-hit" hover-class="dk-press" :hover-stay-time="60" @tap.stop="clearSearch">×</view>
           </view>
           <text class="search-hint">搜索标题和正文</text>
         </view>
 
-        <view class="calendar-preview" role="button" aria-label="打开回忆日历" @tap="openCalendar">
+        <view class="calendar-preview" role="button" aria-label="打开回忆日历" hover-class="dk-press" :hover-stay-time="60" @tap="openCalendar">
           <view class="calendar-preview-head">
             <view class="calendar-preview-name">
               <view class="calendar-glyph">
@@ -94,7 +113,7 @@
 
         <view v-else class="timeline-wrap">
           <view class="timeline-actions">
-            <button class="collapse-all-entry" @tap="toggleAllDays">
+            <button class="collapse-all-entry" hover-class="dk-press" :hover-stay-time="60" @tap="toggleAllDays">
               {{ areAllDaysCollapsed ? '全部展开' : '全部收起' }}
               <view class="collapse-all-chevron" :class="{ closed: areAllDaysCollapsed }" />
             </button>
@@ -102,7 +121,7 @@
 
           <view class="timeline">
             <view
-              v-for="group in groups"
+              v-for="(group, gi) in groups"
               :key="group.key"
               class="timeline-group"
               :class="{ collapsed: isDayCollapsed(group.key) }"
@@ -126,16 +145,21 @@
                 <view
                   v-if="isDayCollapsed(group.key)"
                   class="collapsed-card"
+                  hover-class="dk-press"
+                  :hover-stay-time="60"
                   @tap="toggleDay(group.key)"
                 >
                   <text>{{ group.items.length }} 条随手记</text>
                   <text class="collapsed-action">展开</text>
                 </view>
                 <view
-                  v-for="item in visibleGroupItems(group)"
+                  v-for="(item, idx) in visibleGroupItems(group)"
                   :key="item.id"
                   class="note-card"
-                  :class="{ 'capsule-card': item.isCapsule }"
+                  :class="{ 'capsule-card': item.isCapsule, 'dk-fade-up': gi < 2 && idx < 5 }"
+                  :style="gi < 2 && idx < 5 ? { animationDelay: `${(gi * 5 + idx) * 45}ms` } : undefined"
+                  hover-class="dk-press"
+                  :hover-stay-time="60"
                   @tap="openEntry(item)"
                 >
                   <view class="card-main">
@@ -160,6 +184,8 @@
                 <button
                   v-if="!isDayCollapsed(group.key) && group.items.length > 3 && !searchQuery"
                   class="day-more"
+                  hover-class="dk-press"
+                  :hover-stay-time="60"
                   @tap="toggleAllDayItems(group.key)"
                 >
                   {{ isAllDayItemsVisible(group.key) ? '收起部分记录' : `展开其余 ${group.items.length - 3} 条` }}
@@ -175,8 +201,8 @@
       <button class="fab" aria-label="新建随手记" hover-class="fab-hover" @tap.stop="openCreateMenu"><text class="fab-plus">+</text></button>
     </view>
 
-    <view v-if="showCreateMenu" class="create-mask" @tap="showCreateMenu = false">
-      <view class="create-sheet-host" @tap.stop>
+    <view v-if="showCreateMenu" class="create-mask dk-mask-in" @tap="showCreateMenu = false">
+      <view class="create-sheet-host dk-sheet-up" @tap.stop>
         <CreateEntrySheet
           @close="showCreateMenu = false"
           @select="runCreateAction"
@@ -189,8 +215,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { onShareAppMessage, onShow } from '@dcloudio/uni-app'
+import { onShareAppMessage, onShow, onPullDownRefresh } from '@dcloudio/uni-app'
 import CreateEntrySheet from '@/components/CreateEntrySheet.vue'
+import DkEmpty from '@/components/DkEmpty.vue'
+import DkSkeleton from '@/components/DkSkeleton.vue'
 import { isLoggedIn } from '@/services/auth'
 import { type Entry } from '@/services/entries'
 import { listSpaces, type Space } from '@/services/spaces'
@@ -543,21 +571,17 @@ onShow(() => {
   navBg.value = getTokens(themeId.value).bg
   load()
 })
+
+onPullDownRefresh(async () => {
+  try {
+    await load()
+  } finally {
+    uni.stopPullDownRefresh()
+  }
+})
 </script>
 
 <style lang="scss" scoped>
-.capsule-locked-row {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  padding: 12rpx 0;
-}
-.capsule-lock-icon { font-size: 28rpx; }
-.capsule-lock-text {
-  font-size: 24rpx;
-  color: #999;
-  font-style: italic;
-}
 .capsule-unlocked-tag {
   flex-shrink: 0;
   padding: 4rpx 10rpx;
@@ -633,11 +657,12 @@ onShow(() => {
   justify-content: center;
   height: 56rpx;
   padding: 0 24rpx;
-  border-radius: 999rpx;
+  border-radius: var(--dk-radius-pill, 999rpx);
   background: var(--dk-surface, #fff);
   color: var(--dk-muted);
   font-size: var(--dk-fs-meta, 24rpx);
   border: 1rpx solid var(--dk-line);
+  transition: background-color var(--dk-motion-fast, 140ms) linear, color var(--dk-motion-fast, 140ms) linear, border-color var(--dk-motion-fast, 140ms) linear;
   &.on {
     color: #fff;
     background: var(--dk-brand);
@@ -653,16 +678,20 @@ onShow(() => {
   flex-shrink: 0;
   padding: 0;
   border: 1rpx solid var(--dk-line);
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-md, 16rpx);
   color: var(--dk-muted);
   background: var(--dk-surface);
+  transition: color var(--dk-motion-fast, 140ms) linear, border-color var(--dk-motion-fast, 140ms) linear, background-color var(--dk-motion-fast, 140ms) linear;
   &.on { color: var(--dk-brand); border-color: var(--dk-brand); background: var(--dk-brand-soft); }
 }
 .search-entry::after { border: 0; }
 .search-glyph { position: relative; display: inline-block; width: 23rpx; height: 23rpx; border: 3rpx solid currentColor; border-radius: 50%; box-sizing: border-box; }
 .search-glyph::after { content: ''; position: absolute; right: -7rpx; bottom: -5rpx; width: 9rpx; height: 3rpx; border-radius: 3rpx; background: currentColor; transform: rotate(45deg); transform-origin: left center; }
-.search-panel { display: flex; align-items: center; gap: 14rpx; margin: -12rpx 0 28rpx; }
-.search-field { display: flex; flex: 1; min-width: 0; height: 64rpx; align-items: center; gap: 16rpx; padding: 0 18rpx; border: 1rpx solid rgba(255, 255, 255, 0.65); border-radius: 16rpx; color: var(--dk-muted); background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface)); box-sizing: border-box; box-shadow: 0 8rpx 20rpx rgba(47, 111, 106, 0.04); }
+@keyframes notes-panel-in {
+  from { opacity: 0; transform: translateY(-10rpx); }
+}
+.search-panel { display: flex; align-items: center; gap: 14rpx; margin: -12rpx 0 28rpx; animation: notes-panel-in var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out) backwards; }
+.search-field { display: flex; flex: 1; min-width: 0; height: 64rpx; align-items: center; gap: 16rpx; padding: 0 18rpx; border: 1rpx solid rgba(255, 255, 255, 0.65); border-radius: var(--dk-radius-md, 16rpx); color: var(--dk-muted); background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface)); box-sizing: border-box; box-shadow: var(--dk-shadow-soft, 0 8rpx 20rpx rgba(47, 111, 106, 0.04)); }
 .field-glyph { width: 21rpx; height: 21rpx; flex-shrink: 0; }
 .search-input { flex: 1; min-width: 0; height: 62rpx; color: var(--dk-ink); font-size: var(--dk-fs-meta, 24rpx); line-height: 62rpx; }
 .search-clear { display: flex; width: 32rpx; height: 32rpx; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; color: var(--dk-muted); background: var(--dk-bg-soft); font-size: var(--dk-fs-body, 28rpx); line-height: 1; }
@@ -719,12 +748,11 @@ onShow(() => {
   margin: -10rpx 0 14rpx;
   padding: 15rpx 18rpx 13rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.7);
-  border-radius: 20rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(228, 240, 238, 0.55));
-  box-shadow: 0 16rpx 36rpx rgba(47, 111, 106, 0.07), 0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07), 0 2rpx 8rpx rgba(28, 36, 35, 0.03));
   box-sizing: border-box;
 }
-.calendar-preview:active { opacity: .78; }
 .calendar-preview-head,
 .calendar-preview-name {
   display: flex;
@@ -849,7 +877,7 @@ onShow(() => {
   min-height: 76rpx;
   padding: 0 22rpx;
   border: 1rpx dashed var(--dk-line);
-  border-radius: 16rpx;
+  border-radius: var(--dk-radius-md, 16rpx);
   color: var(--dk-muted);
   background: var(--dk-surface);
   font-size: var(--dk-fs-meta, 24rpx);
@@ -867,22 +895,16 @@ onShow(() => {
   margin-bottom: 18rpx;
   padding: 20rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.65);
-  border-radius: 18rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface, #fff));
-  box-shadow:
-    0 16rpx 36rpx rgba(47, 111, 106, 0.07),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+  box-shadow: var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07), 0 2rpx 8rpx rgba(28, 36, 35, 0.03));
   box-sizing: border-box;
-  &:active {
-    opacity: 0.75;
-  }
 }
 .capsule-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), var(--dk-surface, #fff));
   box-shadow:
     inset 4rpx 0 0 var(--dk-brand),
-    0 16rpx 36rpx rgba(47, 111, 106, 0.07),
-    0 2rpx 8rpx rgba(28, 36, 35, 0.03);
+    var(--dk-shadow-card, 0 16rpx 36rpx rgba(47, 111, 106, 0.07), 0 2rpx 8rpx rgba(28, 36, 35, 0.03));
 }
 .note-card:last-child {
   margin-bottom: 0;
@@ -960,7 +982,7 @@ onShow(() => {
 .cover {
   width: 100%;
   height: 100%;
-  border-radius: 12rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   background: var(--dk-brand-soft);
 }
 .image-count {
@@ -985,7 +1007,7 @@ onShow(() => {
   margin: 4rpx 0 0;
   padding: 0;
   border: 0;
-  border-radius: 14rpx;
+  border-radius: var(--dk-radius-md, 14rpx);
   color: var(--dk-brand);
   background: var(--dk-brand-soft);
   font-size: var(--dk-fs-meta, 24rpx);
@@ -993,22 +1015,6 @@ onShow(() => {
 }
 .day-more::after {
   border: 0;
-}
-.empty {
-  padding: 60rpx 0;
-  text-align: center;
-  color: var(--dk-muted);
-  font-size: var(--dk-fs-body, 28rpx);
-}
-.login-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24rpx;
-}
-.login-empty-copy {
-  display: block;
-  line-height: 1.55;
 }
 .login-empty .btn {
   margin: 0;
@@ -1019,12 +1025,33 @@ onShow(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 80rpx;
+  padding: var(--dk-space-3, 24rpx) 0 80rpx;
   box-sizing: border-box;
 }
-.empty-t {
-  font-size: var(--dk-fs-title, 30rpx);
-  color: var(--dk-muted);
+.notes-skeleton {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 18rpx;
+}
+.notes-skeleton-card {
+  display: flex;
+  height: 168rpx;
+  min-height: 168rpx;
+  gap: 18rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.65);
+  border-radius: var(--dk-radius-md, 18rpx);
+  background: var(--dk-surface, #fff);
+  box-sizing: border-box;
+}
+.notes-skeleton-main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14rpx;
 }
 .btn {
   margin-top: 28rpx;
@@ -1037,7 +1064,7 @@ onShow(() => {
   font-size: var(--dk-fs-body, 28rpx);
   color: #fff;
   background: var(--dk-brand);
-  border-radius: 12rpx;
+  border-radius: var(--dk-radius-md, 12rpx);
   border: none;
   &::after {
     border: none;

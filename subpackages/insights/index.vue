@@ -1,10 +1,17 @@
 <template>
   <view class="page" :style="pageStyle">
     <view class="intro"><text class="title">给你的小提示</text><text class="desc">{{ scopeDesc }}</text></view>
-    <view v-if="loading && !insights.length" class="state">正在翻一翻最近的记录…</view>
+    <view v-if="loading && !insights.length" class="insights-skeleton">
+      <view v-for="n in 2" :key="n" class="insight-skeleton-card">
+        <DkSkeleton type="line" w="34%" h="24rpx" />
+        <DkSkeleton type="line" w="72%" h="32rpx" />
+        <DkSkeleton type="line" w="96%" />
+        <DkSkeleton type="line" w="58%" />
+      </view>
+    </view>
     <view v-else-if="!insights.length" class="empty-card"><text class="empty-icon">✦</text><text class="empty-title">小提示正在慢慢形成</text><text class="empty-copy">再留下一些记录、约定和心情，值得在乎的小事会在合适的时候抵达。</text></view>
     <view v-else class="list">
-      <view v-for="item in sortedInsights" :key="item.id" class="insight" :class="item.type">
+      <view v-for="(item, idx) in sortedInsights" :key="item.id" class="insight dk-fade-up" :class="item.type" :style="{ animationDelay: `${Math.min(idx, 4) * 50}ms` }">
         <view class="insight-head"><text class="kind">{{ kindLabel(item.type) }}</text><text class="dismiss" @tap="dismiss(item.id)">不再显示</text></view>
         <text class="insight-title">{{ item.title }}</text><text class="content">{{ item.content }}</text>
         <view v-if="item.actionType !== 'none'" class="actions"><button @tap="act(item)">{{ item.actionType === 'diary' ? '写一句话' : '创建约定' }}</button></view>
@@ -18,6 +25,7 @@ import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { dismissInsight, listInsights, type Insight } from '@/services/insights'
 import { useThemePage } from '@/composables/useThemePage'
+import DkSkeleton from '@/components/DkSkeleton.vue'
 const { pageStyle } = useThemePage()
 const insights = ref<Insight[]>([])
 const loading = ref(false)
@@ -42,5 +50,5 @@ onShow(()=>{void load()})
 </script>
 
 <style scoped lang="scss">
-.page{min-height:100vh;padding:34rpx 32rpx calc(60rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:var(--dk-bg);color:var(--dk-ink)}.intro{padding:8rpx 4rpx 32rpx}.title{display:block;font-size:46rpx;font-weight:800}.desc{display:block;margin-top:8rpx;color:var(--dk-muted);font-size:25rpx}.state{padding:130rpx 24rpx;color:var(--dk-muted);font-size:25rpx;line-height:1.7;text-align:center}.empty-card{display:flex;align-items:center;padding:72rpx 38rpx;border:1rpx solid var(--dk-line);border-radius:28rpx;background:var(--dk-surface);flex-direction:column;text-align:center}.empty-icon{color:var(--dk-brand);font-size:48rpx}.empty-title{margin-top:18rpx;font-size:30rpx;font-weight:750}.empty-copy{margin-top:12rpx;color:var(--dk-muted);font-size:24rpx;line-height:1.7}.insight{margin-bottom:22rpx;padding:30rpx;border:1rpx solid var(--dk-line);border-radius:28rpx;background:var(--dk-surface);box-shadow:0 12rpx 34rpx rgba(35,63,57,.05)}.insight.anniversary{border-color:rgba(176,137,72,.18);background:linear-gradient(135deg,#fff9f1,#fef3e2)}.insight.care{background:linear-gradient(145deg,#fff9f5,var(--dk-surface))}.insight-head{display:flex;align-items:center;justify-content:space-between}.kind{color:var(--dk-ink);font-size:25rpx;font-weight:750}.anniversary .kind{color:#8b6b2a}.dismiss{color:var(--dk-muted);font-size:21rpx}.insight-title{display:block;margin-top:22rpx;font-size:31rpx;font-weight:780;line-height:1.4}.content{display:block;margin-top:12rpx;color:#5c625f;font-size:25rpx;line-height:1.7;white-space:pre-wrap}.actions{display:flex;margin-top:24rpx}.actions button{height:70rpx;margin:0;padding:0 28rpx;border:0;border-radius:18rpx;color:#fff;background:var(--dk-brand);font-size:24rpx;font-weight:700;line-height:70rpx}.actions button::after{border:0}
+.page{min-height:100vh;padding:34rpx 32rpx calc(60rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:var(--dk-bg);color:var(--dk-ink)}.intro{padding:8rpx 4rpx 32rpx}.title{display:block;font-size:46rpx;font-weight:800}.desc{display:block;margin-top:8rpx;color:var(--dk-muted);font-size:25rpx}.insights-skeleton{display:flex;flex-direction:column;gap:22rpx}.insight-skeleton-card{display:flex;flex-direction:column;gap:16rpx;padding:30rpx;border:1rpx solid var(--dk-line);border-radius:var(--dk-radius-lg,24rpx);background:var(--dk-surface);box-shadow:var(--dk-shadow-card,0 12rpx 34rpx rgba(35,63,57,.05))}.state{padding:130rpx 24rpx;color:var(--dk-muted);font-size:25rpx;line-height:1.7;text-align:center}.empty-card{display:flex;align-items:center;padding:72rpx 38rpx;border:1rpx solid var(--dk-line);border-radius: var(--dk-radius-lg, 24rpx);background:var(--dk-surface);flex-direction:column;text-align:center}.empty-icon{color:var(--dk-brand);font-size:48rpx}.empty-title{margin-top:18rpx;font-size:30rpx;font-weight:750}.empty-copy{margin-top:12rpx;color:var(--dk-muted);font-size:24rpx;line-height:1.7}.insight{margin-bottom:22rpx;padding:30rpx;border:1rpx solid var(--dk-line);border-radius: var(--dk-radius-lg, 24rpx);background:var(--dk-surface);box-shadow: var(--dk-shadow-card, 0 12rpx 34rpx rgba(35,63,57,.05))}.insight.anniversary{border-color:rgba(176,137,72,.18);background:linear-gradient(135deg,#fff9f1,#fef3e2)}.insight.care{background:linear-gradient(145deg,#fff9f5,var(--dk-surface))}.insight-head{display:flex;align-items:center;justify-content:space-between}.kind{color:var(--dk-ink);font-size:25rpx;font-weight:750}.anniversary .kind{color: var(--dk-gold, #8b6b2a)}.dismiss{color:var(--dk-muted);font-size:21rpx}.insight-title{display:block;margin-top:22rpx;font-size:31rpx;font-weight:780;line-height:1.4}.content{display:block;margin-top:12rpx;color: var(--dk-muted, #5c625f);font-size:25rpx;line-height:1.7;white-space:pre-wrap}.actions{display:flex;margin-top:24rpx}.actions button{height:70rpx;margin:0;padding:0 28rpx;border:0;border-radius: var(--dk-radius-md, 18rpx);color:#fff;background:var(--dk-brand);font-size:24rpx;font-weight:700;line-height:70rpx}.actions button::after{border:0}
 </style>

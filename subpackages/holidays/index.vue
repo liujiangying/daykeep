@@ -160,7 +160,7 @@ onShow(() => {
   justify-content: space-between;
   gap: 20rpx;
   padding: 22rpx 24rpx;
-  border-radius: 14rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   background: var(--dk-surface, #fff);
 }
 
@@ -206,7 +206,7 @@ onShow(() => {
 .empty-tip {
   margin-bottom: 12rpx;
   padding: 16rpx 20rpx;
-  border-radius: 12rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   color: var(--dk-muted, #6b736f);
   background: var(--dk-brand-soft, #e4f0ee);
   font-size: 22rpx;
@@ -214,7 +214,7 @@ onShow(() => {
 
 .holiday-list {
   overflow: hidden;
-  border-radius: 14rpx;
+  border-radius: var(--dk-radius-sm, 12rpx);
   background: var(--dk-surface, #fff);
 }
 
@@ -251,7 +251,7 @@ onShow(() => {
 
 .visible-tag {
   padding: 2rpx 8rpx;
-  border-radius: 999rpx;
+  border-radius: var(--dk-radius-pill, 999rpx);
   font-size: 18rpx;
   color: var(--dk-brand, #2f6f6a);
   background: var(--dk-brand-soft, #e4f0ee);

@@ -21,6 +21,15 @@ export interface ThemeTokens {
   tabSelected: string
   tabBg: string
   tabBorder: 'black' | 'white'
+  /** v2 统一令牌：功能色 / 骨架占位 / 阴影，按主题微调色调 */
+  danger: string
+  dangerSoft: string
+  gold: string
+  goldSoft: string
+  skeletonBg: string
+  skeletonSheen: string
+  shadowCard: string
+  shadowSoft: string
 }
 
 export const THEMES: Record<ThemeId, ThemeTokens> = {
@@ -43,6 +52,14 @@ export const THEMES: Record<ThemeId, ThemeTokens> = {
     tabSelected: '#2f6f6a',
     tabBg: '#fffefb',
     tabBorder: 'black',
+    danger: '#b64d46',
+    dangerSoft: '#f3e5e3',
+    gold: '#b98519',
+    goldSoft: '#f4e7c4',
+    skeletonBg: '#e7ecea',
+    skeletonSheen: 'rgba(255, 255, 255, 0.65)',
+    shadowCard: '0 16rpx 36rpx rgba(47, 111, 106, 0.07), 0 2rpx 8rpx rgba(28, 36, 35, 0.03)',
+    shadowSoft: '0 8rpx 20rpx rgba(47, 111, 106, 0.05)',
   },
   paper: {
     id: 'paper',
@@ -63,6 +80,14 @@ export const THEMES: Record<ThemeId, ThemeTokens> = {
     tabSelected: '#8b4518',
     tabBg: '#faf6ee',
     tabBorder: 'black',
+    danger: '#a63d2f',
+    dangerSoft: '#efe0dc',
+    gold: '#b98519',
+    goldSoft: '#f4e7c4',
+    skeletonBg: '#e8e1d2',
+    skeletonSheen: 'rgba(255, 255, 255, 0.65)',
+    shadowCard: '0 16rpx 36rpx rgba(139, 69, 24, 0.06), 0 2rpx 8rpx rgba(42, 36, 28, 0.03)',
+    shadowSoft: '0 8rpx 20rpx rgba(139, 69, 24, 0.05)',
   },
   mono: {
     id: 'mono',
@@ -83,6 +108,14 @@ export const THEMES: Record<ThemeId, ThemeTokens> = {
     tabSelected: '#141414',
     tabBg: '#ffffff',
     tabBorder: 'black',
+    danger: '#b64d46',
+    dangerSoft: '#f3e5e3',
+    gold: '#b98519',
+    goldSoft: '#f4e7c4',
+    skeletonBg: '#e9e9e7',
+    skeletonSheen: 'rgba(255, 255, 255, 0.65)',
+    shadowCard: '0 16rpx 36rpx rgba(20, 20, 20, 0.05), 0 2rpx 8rpx rgba(20, 20, 20, 0.02)',
+    shadowSoft: '0 8rpx 20rpx rgba(20, 20, 20, 0.04)',
   },
 }
 
@@ -225,6 +258,14 @@ export function themeCssVars(id?: ThemeId): Record<string, string> {
     '--dk-line': t.line,
     '--dk-accent': t.accent,
     '--dk-surface': t.surface,
+    '--dk-danger': t.danger,
+    '--dk-danger-soft': t.dangerSoft,
+    '--dk-gold': t.gold,
+    '--dk-gold-soft': t.goldSoft,
+    '--dk-skeleton-bg': t.skeletonBg,
+    '--dk-skeleton-sheen': t.skeletonSheen,
+    '--dk-shadow-card': t.shadowCard,
+    '--dk-shadow-soft': t.shadowSoft,
     ...fontSizeCssVars(),
     backgroundColor: t.bg,
     color: t.ink,

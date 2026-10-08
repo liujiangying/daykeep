@@ -146,7 +146,7 @@ onLoad((query: any) => {
 
 <style scoped lang="scss">
 .page { min-height: 100vh; padding: 32rpx; background: var(--dk-bg); color: var(--dk-ink); }
-.hero { margin-bottom: 28rpx; padding: 8rpx 2rpx; }.question-card,.result-card { margin-bottom: 24rpx; padding: 28rpx; border:1rpx solid var(--dk-line); border-radius: 28rpx; background: var(--dk-surface); box-shadow: 0 8rpx 24rpx rgba(24,42,39,.04); }
+.hero { margin-bottom: 28rpx; padding: 8rpx 2rpx; }.question-card,.result-card { margin-bottom: 24rpx; padding: 28rpx; border:1rpx solid var(--dk-line); border-radius: var(--dk-radius-lg, 24rpx); background: var(--dk-surface); box-shadow: var(--dk-shadow-soft, 0 8rpx 24rpx rgba(24,42,39,.04)); }
 .title { display: block; font-size: 44rpx; font-weight: 760; line-height: 1.25; }
 .subtitle { display: block; margin-top: 10rpx; color: var(--dk-muted); font-size: 25rpx; line-height: 1.55; }
 .state { padding: 120rpx 0; text-align: center; color: var(--dk-muted); }
@@ -154,10 +154,10 @@ onLoad((query: any) => {
 .q-index { display: block; color: var(--dk-brand); font-size: 22rpx; font-weight: 700; }
 .q-title { display: block; margin-top: 8rpx; font-size: 31rpx; font-weight: 700; line-height: 1.45; }
 .options { display: grid; gap: 12rpx; margin-top: 22rpx; }
-.option { min-height: 72rpx; margin: 0; padding: 0 22rpx; border: 1rpx solid var(--dk-line); border-radius: 18rpx; background: var(--dk-bg-soft); color: var(--dk-ink); font-size: 26rpx; line-height: 72rpx; text-align: left; }
+.option { min-height: 72rpx; margin: 0; padding: 0 22rpx; border: 1rpx solid var(--dk-line); border-radius: var(--dk-radius-md, 18rpx); background: var(--dk-bg-soft); color: var(--dk-ink); font-size: 26rpx; line-height: 72rpx; text-align: left; }
 .option.on { border-color: var(--dk-brand); background: var(--dk-brand-soft); color: var(--dk-brand); font-weight: 700; }
 .option::after,.submit::after { border: 0; }
-.submit { width: 100%; height: 84rpx; margin: 18rpx 0 0; border: 0; border-radius: 999rpx; background: var(--dk-brand); color: #fff; font-size: 29rpx; font-weight: 700; line-height: 84rpx; }
+.submit { width: 100%; height: 84rpx; margin: 18rpx 0 0; border: 0; border-radius: var(--dk-radius-pill, 999rpx); background: var(--dk-brand); color: #fff; font-size: 29rpx; font-weight: 700; line-height: 84rpx; }
 .submit[disabled] { opacity: .5; }
 .submit.ghost { background: var(--dk-bg-soft); color: var(--dk-ink); }
 .result-card { text-align: center; padding: 48rpx 32rpx; }

@@ -1,17 +1,19 @@
 <template>
   <view class="login">
-    <view class="brand">
+    <view class="brand dk-fade-up">
       <text class="name">只我们</text>
       <text class="slogan">世界很大，这里只我们</text>
     </view>
 
-    <view class="actions">
+    <view class="actions dk-fade-up" style="animation-delay: 90ms">
       <!-- #ifdef MP-WEIXIN -->
       <!-- 微信一键登录（仅小程序端） -->
       <button
         class="btn primary wx-btn"
         :loading="wxLoading || checking"
         :disabled="wxLoading || phoneLoading || checking"
+        hover-class="dk-press"
+        :hover-stay-time="60"
         @tap="onWxLogin"
       >
         {{ checking ? '正在检查登录状态…' : '微信一键登录' }}
@@ -50,6 +52,8 @@
             <button
               class="send-btn"
               :disabled="countdown > 0 || !isPhoneValid"
+              hover-class="dk-press"
+              :hover-stay-time="60"
               @tap="onSendCode"
             >{{ countdown > 0 ? `${countdown}s` : '获取验证码' }}</button>
           </view>
@@ -57,6 +61,8 @@
             class="btn primary"
             :loading="phoneLoading"
             :disabled="!canPhoneLogin || wxLoading"
+            hover-class="dk-press"
+            :hover-stay-time="60"
             @tap="onPhoneLogin"
           >手机号登录</button>
         </view>
@@ -76,6 +82,8 @@
             class="btn dev-btn"
             :loading="devLoading === p.phone"
             :disabled="!!devLoading || wxLoading || phoneLoading"
+            hover-class="dk-press"
+            :hover-stay-time="60"
             @tap="onDevLogin(p.phone)"
           >{{ p.label }}</button>
         </view>
@@ -282,6 +290,7 @@ async function onPhoneLogin() {
 </script>
 
 <style scoped>
+/* 登录页先于主题注入出现，令牌走 var() 兜底（对应 teal 主题），登录成功后页面均按主题渲染 */
 .login {
   min-height: 100vh;
   display: flex;
@@ -289,7 +298,7 @@ async function onPhoneLogin() {
   justify-content: center;
   padding: 48rpx;
   padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, #fff 0%, #f2f4f3 100%);
+  background: linear-gradient(180deg, var(--dk-surface, #fff) 0%, var(--dk-bg, #f2f4f3) 100%);
 }
 .brand {
   display: flex;
@@ -301,11 +310,11 @@ async function onPhoneLogin() {
   font-size: var(--dk-fs-hero, 64rpx);
   font-weight: 600;
   letter-spacing: 0.12em;
-  color: #1c2423;
+  color: var(--dk-ink, #1c2423);
 }
 .slogan {
   font-size: var(--dk-fs-label, 26rpx);
-  color: #6b736f;
+  color: var(--dk-muted, #6b736f);
   margin-top: 20rpx;
 }
 .actions {
@@ -316,22 +325,24 @@ async function onPhoneLogin() {
 }
 .btn {
   width: 100%;
-  border-radius: 14rpx;
+  border-radius: var(--dk-radius-md, 18rpx);
   height: 88rpx;
   line-height: 88rpx;
   font-size: var(--dk-fs-body, 28rpx);
   border: none;
+  transition: transform var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out), opacity var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out);
 }
 .btn::after {
   border: none;
 }
 .btn.primary {
-  background: #2f6f6a;
+  background: var(--dk-brand, #2f6f6a);
   color: #fff;
 }
 .btn.primary[disabled] {
-  background: #a8c5c3;
+  background: var(--dk-brand, #2f6f6a);
   color: #fff;
+  opacity: .45;
 }
 .btn.primary.wx-btn {
   position: relative;
@@ -340,8 +351,8 @@ async function onPhoneLogin() {
   align-items: center;
   justify-content: center;
   border: 1rpx solid rgba(105, 123, 125, 0.28);
-  border-radius: 24rpx;
-  color: #202725;
+  border-radius: var(--dk-radius-lg, 24rpx);
+  color: var(--dk-ink, #202725);
   background:
     radial-gradient(circle at 18% -70%, rgba(255, 255, 255, 1) 0, rgba(255, 255, 255, 0.78) 34%, transparent 58%),
     linear-gradient(135deg, rgba(249, 252, 252, 0.94), rgba(216, 226, 228, 0.82));
@@ -352,7 +363,7 @@ async function onPhoneLogin() {
     0 4rpx 12rpx rgba(35, 47, 45, 0.1);
   backdrop-filter: blur(24rpx) saturate(135%);
   -webkit-backdrop-filter: blur(24rpx) saturate(135%);
-  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  transition: transform var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out), opacity var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out), box-shadow 120ms ease;
 }
 .btn.primary.wx-btn::before {
   position: absolute;
@@ -360,7 +371,7 @@ async function onPhoneLogin() {
   right: 26rpx;
   left: 26rpx;
   height: 1rpx;
-  border-radius: 999rpx;
+  border-radius: var(--dk-radius-pill, 999rpx);
   background: rgba(255, 255, 255, 0.92);
   content: '';
   pointer-events: none;
@@ -369,27 +380,18 @@ async function onPhoneLogin() {
   position: absolute;
   inset: 3rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.62);
-  border-radius: 21rpx;
+  border-radius: calc(var(--dk-radius-lg, 24rpx) - 3rpx);
   content: '';
   pointer-events: none;
 }
-.btn.primary.wx-btn:active:not([disabled]) {
-  transform: translateY(2rpx) scale(0.992);
-  background:
-    radial-gradient(circle at 18% -70%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.62) 34%, transparent 58%),
-    linear-gradient(135deg, rgba(235, 241, 241, 0.94), rgba(204, 216, 218, 0.84));
-  box-shadow:
-    inset 0 2rpx 5rpx rgba(60, 72, 70, 0.1),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.76),
-    0 7rpx 18rpx rgba(35, 47, 45, 0.1);
-}
 .btn.primary.wx-btn[disabled] {
-  color: #8b9290;
+  color: var(--dk-muted, #8b9290);
   border-color: rgba(123, 137, 138, 0.18);
   background: linear-gradient(135deg, rgba(247, 249, 249, 0.8), rgba(224, 230, 231, 0.66));
   box-shadow:
     inset 0 1rpx 0 rgba(255, 255, 255, 0.86),
     0 10rpx 24rpx rgba(35, 47, 45, 0.08);
+  opacity: 1;
 }
 
 /* 分割线 */
@@ -402,12 +404,12 @@ async function onPhoneLogin() {
 .divider .line {
   flex: 1;
   height: 1rpx;
-  background: #e0e3e2;
+  background: var(--dk-line, #e0e3e2);
 }
 .divider-text {
   padding: 0 24rpx;
-  font-size: 24rpx;
-  color: #999;
+  font-size: var(--dk-fs-caption, 24rpx);
+  color: var(--dk-muted, #999);
 }
 
 /* 开发者登录 */
@@ -418,16 +420,17 @@ async function onPhoneLogin() {
 }
 .dev-btn {
   flex: 1;
-  background: #f2f4f3;
-  color: #2f6f6a;
-  border: 1rpx solid #cfdad8;
+  background: var(--dk-bg-soft, #f2f4f3);
+  color: var(--dk-brand, #2f6f6a);
+  border: 1rpx solid var(--dk-line, #cfdad8);
 }
 .dev-btn[disabled] {
-  color: #9bb0ad;
+  color: var(--dk-muted, #9bb0ad);
+  opacity: .6;
 }
 .dev-hint {
-  font-size: 22rpx;
-  color: #9aa39f;
+  font-size: var(--dk-fs-caption, 22rpx);
+  color: var(--dk-muted, #9aa39f);
 }
 
 /* 手机号表单 */
@@ -441,14 +444,14 @@ async function onPhoneLogin() {
   display: flex;
   align-items: center;
   height: 88rpx;
-  background: #f7f8f7;
-  border-radius: 14rpx;
+  background: var(--dk-bg-soft, #f7f8f7);
+  border-radius: var(--dk-radius-md, 18rpx);
   padding: 0 24rpx;
-  border: 1rpx solid #e8ebe9;
+  border: 1rpx solid var(--dk-line, #e8ebe9);
 }
 .prefix {
   font-size: 28rpx;
-  color: #333;
+  color: var(--dk-ink, #333);
   margin-right: 16rpx;
   font-weight: 500;
 }
@@ -456,24 +459,27 @@ async function onPhoneLogin() {
   flex: 1;
   height: 88rpx;
   font-size: 28rpx;
+  color: var(--dk-ink, #1c2423);
 }
 .code-input {
   flex: 1;
   height: 88rpx;
   font-size: 28rpx;
+  color: var(--dk-ink, #1c2423);
 }
 .send-btn {
-  font-size: 24rpx;
-  color: #2f6f6a;
+  font-size: var(--dk-fs-meta, 24rpx);
+  color: var(--dk-brand, #2f6f6a);
   background: transparent;
   border: none;
   padding: 0 8rpx;
   height: auto;
   line-height: 1.5;
   white-space: nowrap;
+  transition: opacity var(--dk-motion-fast, 140ms) var(--dk-ease-out, ease-out);
 }
 .send-btn[disabled] {
-  color: #aaa;
+  color: var(--dk-muted, #aaa);
 }
 .send-btn::after {
   border: none;
@@ -481,7 +487,7 @@ async function onPhoneLogin() {
 
 .tip {
   font-size: var(--dk-fs-meta, 24rpx);
-  color: #999;
+  color: var(--dk-muted, #999);
   margin-top: 8rpx;
   text-align: center;
   line-height: 1.5;
